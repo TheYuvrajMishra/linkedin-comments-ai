@@ -937,20 +937,25 @@ function autofillDraftJSEditor(editor, text) {
   // Focus the input
   editor.focus();
 
-  // Step 1: Wait 150ms for initial focus events to settle
+  // If the editor is already empty, avoid clearing it to prevent flicker/empty space showing
+  const isAlreadyEmpty = !editor.textContent || editor.textContent.trim() === "";
+
+  // Step 1: Wait a brief 30ms for initial focus events to settle
   setTimeout(() => {
-    // Clear existing content first to prepare for the typing stream
-    try {
-      document.execCommand("selectAll", false, null);
-      document.execCommand("insertText", false, "");
-    } catch (e) {
-      editor.innerText = "";
+    if (!isAlreadyEmpty) {
+      // Clear existing content first to prepare for the typing stream
+      try {
+        document.execCommand("selectAll", false, null);
+        document.execCommand("insertText", false, "");
+      } catch (e) {
+        editor.innerText = "";
+      }
+
+      // Notify Draft.js of selection clear
+      editor.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
     }
 
-    // Notify Draft.js of selection clear
-    editor.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
-
-    // Step 2: Wait 200ms for Draft.js to reconcile the cleared editor state
+    // Step 2: Wait a brief 30ms (or 0ms if already empty) for Draft.js to reconcile
     setTimeout(() => {
       // Tokenize text into words and whitespaces to preserve formatting
       // Normalize any newline characters inside whitespace tokens to spaces to prevent browser formatting drops
@@ -988,9 +993,9 @@ function autofillDraftJSEditor(editor, text) {
 
           tokenIndex++;
 
-          // Step 3: Wait 250ms after typing the very first token to let state reconcile, 
-          // then resume with the natural typing speed delay (50ms to 90ms) for subsequent tokens.
-          const delay = (tokenIndex === 1) ? 250 : 50 + Math.random() * 40;
+          // Step 3: Wait a short delay after typing the very first token to let state reconcile, 
+          // then resume with a fast natural typing speed delay (15ms to 35ms) for subsequent tokens.
+          const delay = (tokenIndex === 1) ? 50 : 15 + Math.random() * 20;
           setTimeout(typeNextToken, delay);
         } else {
           // Typing complete - send final input and key events to finalize editor state
@@ -1010,8 +1015,8 @@ function autofillDraftJSEditor(editor, text) {
 
       // Start typing loop
       typeNextToken();
-    }, 200);
-  }, 150);
+    }, isAlreadyEmpty ? 0 : 30);
+  }, 30);
 }
 
 // Start helper to wait for page to settle and hydrate before running init
