@@ -223,7 +223,109 @@ function cleanup() {
     } catch (e) {}
     globalIntervalId = null;
   }
+  try {
+    closeActiveDropdownPortal();
+  } catch (e) {}
   console.log("LinkAI: Extension context was invalidated. Cleaned up observers.");
+}
+
+let activeDropdownPortal = null;
+
+// Renders the dropdown using a portal (appending directly to document.body)
+// positioned dynamically to prevent layout/overflow clipping from LinkedIn's feed containers
+function showToneDropdownPortal(triggerElement, currentTone, onSelect) {
+  if (activeDropdownPortal) {
+    closeActiveDropdownPortal();
+  }
+
+  // Create portal dropdown container
+  const portal = document.createElement("div");
+  portal.className = "linkai-portal-dropdown";
+  
+  // Style portal
+  portal.style.position = "fixed";
+  portal.style.background = "#111827";
+  portal.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+  portal.style.borderRadius = "12px";
+  portal.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.4)";
+  portal.style.padding = "6px";
+  portal.style.minWidth = "145px";
+  portal.style.zIndex = "999999";
+  portal.style.display = "flex";
+  portal.style.flexDirection = "column";
+  portal.style.gap = "2px";
+  portal.style.fontFamily = "-apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+  portal.style.boxSizing = "border-box";
+  
+  // Render options
+  TONES.forEach(tone => {
+    const item = document.createElement("div");
+    item.style.display = "flex";
+    item.style.alignItems = "center";
+    item.style.gap = "8px";
+    item.style.padding = "8px 10px";
+    item.style.color = tone.id === currentTone ? "#60a5fa" : "#d1d5db";
+    item.style.background = tone.id === currentTone ? "rgba(10, 102, 194, 0.25)" : "transparent";
+    item.style.fontSize = "12px";
+    item.style.fontWeight = tone.id === currentTone ? "600" : "500";
+    item.style.cursor = "pointer";
+    item.style.borderRadius = "8px";
+    item.style.transition = "all 0.2s";
+    item.style.userSelect = "none";
+    item.innerText = `${tone.emoji} ${tone.label}`;
+    
+    // Hover styling
+    item.addEventListener("mouseenter", () => {
+      item.style.background = "rgba(59, 130, 246, 0.18)";
+      item.style.color = "#ffffff";
+    });
+    item.addEventListener("mouseleave", () => {
+      item.style.background = tone.id === currentTone ? "rgba(10, 102, 194, 0.25)" : "transparent";
+      item.style.color = tone.id === currentTone ? "#60a5fa" : "#d1d5db";
+    });
+    
+    item.addEventListener("click", (e) => {
+      e.stopPropagation();
+      onSelect(tone.id);
+      closeActiveDropdownPortal();
+    });
+    
+    portal.appendChild(item);
+  });
+
+  document.body.appendChild(portal);
+  activeDropdownPortal = portal;
+
+  // Calculate coordinates relative to viewport
+  const rect = triggerElement.getBoundingClientRect();
+  const dropdownHeight = portal.offsetHeight || 178; 
+  
+  // Try placing it above the trigger first
+  let topPos = rect.top - dropdownHeight - 6;
+  if (topPos < 0) {
+    // If it goes off-screen at the top, place it below the trigger
+    topPos = rect.bottom + 6;
+  }
+  
+  portal.style.top = `${topPos}px`;
+  portal.style.left = `${rect.left}px`;
+
+  // Dynamic closure on click-away, scroll, or resize
+  setTimeout(() => {
+    document.addEventListener("click", closeActiveDropdownPortal);
+    window.addEventListener("scroll", closeActiveDropdownPortal, { capture: true, once: true });
+    window.addEventListener("resize", closeActiveDropdownPortal, { once: true });
+  }, 0);
+}
+
+function closeActiveDropdownPortal() {
+  if (activeDropdownPortal) {
+    activeDropdownPortal.remove();
+    activeDropdownPortal = null;
+    document.removeEventListener("click", closeActiveDropdownPortal);
+    window.removeEventListener("scroll", closeActiveDropdownPortal, true);
+    window.removeEventListener("resize", closeActiveDropdownPortal);
+  }
 }
 
 // Initialize DOM checking
@@ -357,14 +459,9 @@ function injectAIElements(editor) {
   const toneTrigger = document.createElement("button");
   toneTrigger.type = "button";
   toneTrigger.className = "linkai-tone-trigger";
-  
-  // Dropdown Menu
-  const dropdown = document.createElement("div");
-  dropdown.className = "linkai-dropdown";
 
   root.appendChild(genBtn);
   root.appendChild(toneTrigger);
-  root.appendChild(dropdown);
   
   // Status feedback text
   const statusText = document.createElement("span");
@@ -399,55 +496,27 @@ function injectAIElements(editor) {
     }
   });
 
-  // Render tone selection dropdown content
-  function renderDropdown() {
-    dropdown.innerHTML = "";
-    TONES.forEach(tone => {
-      const item = document.createElement("div");
-      item.className = `linkai-item ${tone.id === currentTone ? "selected" : ""}`;
-      item.innerHTML = `${tone.emoji} ${tone.label}`;
-      item.addEventListener("click", () => {
-        if (!isContextValid()) {
-          alert("Extension reloaded. Please refresh the page.");
-          return;
-        }
-        currentTone = tone.id;
-        chrome.storage.local.set({ defaultTone: tone.id });
-        updateToneUI();
-        dropdown.classList.remove("show");
-      });
-      dropdown.appendChild(item);
-    });
-  }
-
   function updateToneUI() {
     const activeTone = TONES.find(t => t.id === currentTone) || TONES[0];
     toneTrigger.innerHTML = `${activeTone.emoji} ${activeTone.label} <span style="font-size: 8px; margin-left: 2px;">▼</span>`;
-    renderDropdown();
   }
 
   updateToneUI();
 
-  // Close dropdown helper function
-  function closeDropdown() {
-    dropdown.classList.remove("show");
-    document.removeEventListener("click", closeDropdown);
-  }
-
-  // Dropdown Toggle
+  // Dropdown Toggle (using portal dropdown to prevent layout clipping)
   toneTrigger.addEventListener("click", (e) => {
     e.stopPropagation();
-    const isShown = dropdown.classList.contains("show");
-    if (isShown) {
-      closeDropdown();
-    } else {
-      if (!isContextValid()) return;
-      dropdown.classList.add("show");
-      // Add dynamic listener to close when clicking outside the dropdown
-      setTimeout(() => {
-        document.addEventListener("click", closeDropdown);
-      }, 0);
+    
+    if (!isContextValid()) {
+      alert("Extension reloaded. Please refresh the page.");
+      return;
     }
+    
+    showToneDropdownPortal(toneTrigger, currentTone, (selectedToneId) => {
+      currentTone = selectedToneId;
+      chrome.storage.local.set({ defaultTone: selectedToneId });
+      updateToneUI();
+    });
   });
 
   // Core comment generation trigger
@@ -464,6 +533,8 @@ function injectAIElements(editor) {
 
     // Get post container
     const postContainer = findPostContainer(editor);
+    console.log("LinkAI: Post Container found:", postContainer);
+
     if (!postContainer) {
       showStatus("Could not find post text container.", "error");
       return;
@@ -471,7 +542,6 @@ function injectAIElements(editor) {
 
     // Extract text content of the post
     const postText = extractPostContent(postContainer, editor);
-    console.log("LinkAI: Post Container found:", postContainer);
     console.log("LinkAI: Extracted Post Text:", postText);
 
     if (!postText || postText.trim().length === 0) {
@@ -547,90 +617,89 @@ function injectAIElements(editor) {
   }
 }
 
+// Helper to check if an element is part of the comments section
+function isCommentElement(el) {
+  if (!el || el.nodeType !== Node.ELEMENT_NODE) return false;
+  return (
+    el.classList.contains("comments-comment-item") ||
+    el.classList.contains("comments-comments-list") ||
+    el.classList.contains("comments-comment-box") ||
+    el.classList.contains("comments-comment-box-container") ||
+    (typeof el.matches === "function" && (el.matches("[class*='comments-container']") || el.matches("[class*='comments-box']"))) ||
+    (typeof el.closest === "function" && (
+      el.closest(".comments-comment-item") !== null ||
+      el.closest(".comments-comments-list") !== null ||
+      el.closest(".comments-comment-box") !== null ||
+      el.closest(".comments-comment-box-container") !== null ||
+      el.closest("[class*='comments-container']") !== null
+    ))
+  );
+}
+
 // Traverse upwards to find the container div for the LinkedIn update
 function findPostContainer(editor) {
-  // Try standard selectors, stable data-view tags, and attributes first
+  // Step 1: Escape the comment box entirely before searching
+  const commentBox = editor.closest(
+    ".comments-comment-box, .comments-comment-box-container, .comments-quick-comment-box, form"
+  );
+  const searchRoot = commentBox
+    ? commentBox.parentElement
+    : editor.parentElement;
+    
+  console.log("LinkAI: Search root (after escaping comment box):", searchRoot);
+  if (!searchRoot) return null;
+
+  // Step 2: Try stable selectors from searchRoot upward
   const selectors = [
     '[data-view-name="feed-update"]',
     '[data-view-name="feed-full-update"]',
     '[data-view-name*="update"]',
     'article',
     '[role="article"]',
-    'div[role="article"]',
     '[data-urn]',
     '[data-id]',
     '[data-activity-id]',
     '.feed-shared-update-v2',
     '.occludable-update',
-    '.feed-shared-update',
-    '.update-components-article',
-    '.feed-container-theme',
-    '.feed-shared-update-v4'
   ];
 
-  for (const selector of selectors) {
-    let container = editor.closest(selector);
-    while (container) {
-      // Reject if this matched element is actually part of the comments section
-      const isInsideComments = 
-        container.closest(".comments-comment-item") || 
-        container.closest(".comments-comments-list") ||
-        container.closest(".comments-comment-box") ||
-        container.closest(".comments-comment-box-container");
-        
-      if (!isInsideComments) {
-        return container;
-      }
-      // If it was inside comments, climb higher to find the true post parent
-      container = container.parentElement ? container.parentElement.closest(selector) : null;
+  let curr = searchRoot;
+  while (curr && curr !== document.body) {
+    for (const sel of selectors) {
+      try {
+        if (curr.matches(sel) && !isCommentElement(curr)) {
+          return curr;
+        }
+      } catch (e) {}
     }
+    curr = curr.parentElement;
   }
 
-  // Self-healing step-by-step climbing search based on structural signals
-  let curr = editor.parentElement;
+  // Step 3: Structural heuristic - find ancestor with social bar + post text
+  curr = searchRoot;
   while (curr && curr !== document.body) {
-    // LinkedIn posts always have a social action bar sibling to the text
     const hasSocialBar = curr.querySelector(
-      '[data-view-name*="social-action"], .social-details-social-activity, [aria-label*="React"], [aria-label*="Like"]'
+      '[data-view-name*="social-action"], .social-details-social-activity, [aria-label*="React"], [aria-label*="Comment"], [aria-label*="Like"]'
     );
-    const hasPostText = curr.querySelector(
-      'span[dir="ltr"], span[lang], [dir="ltr"]'
-    );
-    const isNotInsideComments = 
-      !curr.closest(".comments-comments-list") && 
-      !curr.closest(".comments-comment-item") &&
-      !curr.closest(".comments-comment-box") &&
-      !curr.closest(".comments-comment-box-container");
-    
-    if (hasSocialBar && hasPostText && isNotInsideComments) {
-      console.log("LinkAI: Structural container found:", curr.tagName, curr.className.slice(0, 60));
+    const hasText = curr.querySelector('span[dir="ltr"], span[lang]');
+    if (hasSocialBar && hasText && !isCommentElement(curr)) {
       return curr;
     }
     curr = curr.parentElement;
   }
 
-  // Final fallback 1: Use the grandparent of the editor form
-  const form = editor.closest("form, .comments-comment-box__form-container, .comments-comment-box");
-  if (form && form.parentElement && form.parentElement.parentElement) {
-    return form.parentElement.parentElement;
-  }
-
-  // Final fallback 2: Climb up 12 levels (increased to ensure reaching post content)
-  let fallback = editor;
-  const climbChain = [];
-  for (let i = 0; i < 12; i++) {
+  // Step 4: Climb 15 levels from commentBox (not editor)
+  let fallback = commentBox || editor;
+  for (let i = 0; i < 15; i++) {
     if (fallback.parentElement && fallback.parentElement !== document.body) {
       fallback = fallback.parentElement;
-      climbChain.push(`${fallback.tagName}.${fallback.className.split(' ').join('.')}`);
-    } else {
-      break;
-    }
+    } else break;
   }
-  console.warn("LinkAI: Fallback post container selected. Climb path: " + climbChain.join(" -> "));
   return fallback;
 }
 
 // Helper to find the direct child of the post container that wraps the comments section
+// to prevent traversing into it
 function getCommentsAreaChild(editor, postContainer) {
   let curr = editor;
   while (curr && curr.parentElement && curr.parentElement !== postContainer && curr.parentElement !== document.body) {
@@ -679,6 +748,53 @@ function extractTextWithoutSelectors(element, selectorsToIgnore, nodeToIgnore = 
 
 // Extract description text from post container, avoiding sub-comment text
 function extractPostContent(postContainer, editor = null) {
+  // Step 1: Try data-lazy-mount-id scoped text containers (current LinkedIn structure)
+  // LinkedIn wraps post body in a div with data-lazy-mount-id, find the first span[dir="ltr"]
+  // that is NOT inside comments, actors, or social elements.
+  const allSpans = postContainer.querySelectorAll('span[dir="ltr"], span[lang]');
+  const candidates = [];
+  for (const span of allSpans) {
+    if (
+      span.closest(".comments-comment-item") ||
+      span.closest(".comments-comments-list") ||
+      span.closest(".comments-comment-box") ||
+      span.closest(".linkai-container-host") ||
+      span.closest('[data-view-name*="comment"]') ||
+      span.closest(".feed-shared-actor") ||
+      span.closest(".update-components-actor") ||
+      span.closest("[class*='actor']") ||
+      span.closest(".social-details-social-counts") ||
+      span.closest(".feed-shared-social-action-bar") ||
+      span.closest("[class*='social-']") ||
+      span.closest("button")
+    ) {
+      continue;
+    }
+
+    const text = span.innerText?.trim() || span.textContent?.trim() || "";
+    if (text.length > 20) { // meaningful post text
+      const trimmed = text.trim();
+      
+      // If we already have this text or a larger text that contains it, skip.
+      if (candidates.some(t => t.includes(trimmed))) {
+        continue;
+      }
+      
+      // If this text contains any existing text in our list, replace the shorter text with this longer one.
+      const index = candidates.findIndex(t => trimmed.includes(t));
+      if (index !== -1) {
+        candidates[index] = trimmed;
+      } else {
+        candidates.push(trimmed);
+      }
+    }
+  }
+
+  if (candidates.length > 0) {
+    return candidates.join("\n\n");
+  }
+
+  // Step 2: Use descriptionSelectors fallback...
   // Selectors for description element, in order of preference (including stable data-view attributes)
   const descriptionSelectors = [
     '[data-view-name*="commentary"]',
@@ -695,14 +811,15 @@ function extractPostContent(postContainer, editor = null) {
     '[data-view-name*="post-text"]',
     "[class*='commentary']",
     "[class*='description']",
-    'span[dir="ltr"]',
-    'span[lang]'
+    "span.break-words"
   ];
+
+  const extractedTexts = [];
 
   for (const selector of descriptionSelectors) {
     const elements = postContainer.querySelectorAll(selector);
     for (const el of elements) {
-      // Ensure the element is not inside comments, actor/header details, button, social bar, video players, or menus
+      // Ensure the element is not inside comments, actor/header details, button, social bar, video players, or menus.
       if (
         el.closest(".comments-comment-item") || 
         el.closest(".comments-comments-list") ||
@@ -717,46 +834,36 @@ function extractPostContent(postContainer, editor = null) {
         el.closest("[class*='control']") ||
         el.closest(".artdeco-dropdown") ||
         el.closest("[role='menu']") ||
-        el.closest("[role='listbox']") ||
-        el.closest("[role='dialog']")
+        el.closest("[role='listbox']")
       ) {
         continue;
       }
+      
       const text = getCleanText(el);
-      if (text && text.trim().length > 15) return text;
+      if (text && text.trim().length >= 2) {
+        const trimmed = text.trim();
+        
+        // If we already have this text or a larger text that contains it, skip.
+        if (extractedTexts.some(t => t.includes(trimmed))) {
+          continue;
+        }
+        
+        // If this text contains any existing text in our list, replace the shorter text with this longer one.
+        const index = extractedTexts.findIndex(t => trimmed.includes(t));
+        if (index !== -1) {
+          extractedTexts[index] = trimmed;
+        } else {
+          extractedTexts.push(trimmed);
+        }
+      }
     }
   }
 
-  // Backup selector: find primary content container by looking for span.break-words
-  // excluding any spans that are inside comments containers or our injected UI
-  const spans = postContainer.querySelectorAll("span.break-words");
-  for (const span of spans) {
-    if (
-      span.closest(".comments-comment-item") || 
-      span.closest(".comments-comments-list") ||
-      span.closest(".linkai-container-host") ||
-      span.closest(".linkai-container") ||
-      span.closest(".feed-shared-actor") ||
-      span.closest(".update-components-actor") ||
-      span.closest("[class*='actor']") ||
-      span.closest("button") ||
-      span.closest(".social-details-social-counts") ||
-      span.closest(".feed-shared-social-action-bar") ||
-      span.closest("[class*='video']") ||
-      span.closest("[class*='player']") ||
-      span.closest("[class*='control']") ||
-      span.closest(".artdeco-dropdown") ||
-      span.closest("[role='menu']") ||
-      span.closest("[role='listbox']") ||
-      span.closest("[role='dialog']")
-    ) {
-      continue;
-    }
-    const text = getCleanText(span);
-    if (text && text.trim().length > 15) return text;
+  if (extractedTexts.length > 0) {
+    return extractedTexts.join("\n\n");
   }
 
-  // Ultimate fallback: Traverse container, strip comments/forms/buttons, and return remaining text content
+  // Step 3: Scoped fallback - strip comments/forms/buttons, and return remaining text content
   try {
     let commentsChild = null;
     if (editor) {
@@ -778,11 +885,19 @@ function extractPostContent(postContainer, editor = null) {
       "script",
       "style",
       "noscript",
-      "iframe"
+      "iframe",
+      "[class*='actor']",
+      "[class*='header']",
+      "[class*='avatar']",
+      "[class*='profile']",
+      "[class*='social-']",
+      "a[href*='/in/']",
+      "a[href*='/company/']",
+      "time"
     ];
     
     const fallbackText = extractTextWithoutSelectors(postContainer, selectorsToRemove, commentsChild);
-    if (fallbackText) return fallbackText;
+    if (fallbackText && fallbackText.trim().length >= 2) return fallbackText.trim();
   } catch (e) {
     console.error("Fallback text extraction failed", e);
   }
