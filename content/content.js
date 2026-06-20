@@ -403,13 +403,15 @@ function scanForCommentFields() {
       ariaLabel.toLowerCase().includes("reply") || 
       placeholderText.toLowerCase().includes("comment") ||
       placeholderText.toLowerCase().includes("reply") ||
+      editor.closest("[class*='comment']") !== null ||
+      editor.closest("[class*='reply']") !== null ||
       editor.closest(".comments-comment-box") !== null ||
       editor.closest(".comments-quick-comment-box") !== null;
 
     if (!isCommentOrReply) return;
 
     // Self-healing check: check if the parent container actually contains .linkai-container-host
-    const form = editor.closest("form, .comments-comment-box__form-container, .comments-comment-box");
+    const form = editor.closest("form, [class*='comment-box'], .comments-comment-box__form-container, .comments-comment-box");
     let hasContainer = false;
     if (form) {
       hasContainer = form.querySelector(".linkai-container-host") !== null;
@@ -438,10 +440,12 @@ function injectAIElements(editor) {
   // Find action bar (where Emoji / Images / Post buttons live)
   // Typically: .comments-comment-box__form-action-bar
   let actionBar = null;
-  const form = editor.closest("form, .comments-comment-box__form-container, .comments-comment-box");
+  const form = editor.closest("form, [class*='comment-box'], .comments-comment-box__form-container, .comments-comment-box");
   
   if (form) {
-    actionBar = form.querySelector(".comments-comment-box__form-action-bar, .comments-comment-box__actions");
+    actionBar = form.querySelector(
+      ".comments-comment-box__form-action-bar, .comments-comment-box__actions, [class*='comment-box__form-action-bar'], [class*='comment-box__actions'], [class*='form-action-bar'], [class*='actions']"
+    );
   }
   
   // If action bar is not found, fallback to appending directly after the editor
