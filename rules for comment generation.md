@@ -16,6 +16,7 @@
 8. No fake agreement — if you disagree, say it cleanly and move on
 9. End with either a reaction, a specific question to OP, or nothing — never a generic CTA
 10. No "just my two cents", "food for thought", "at the end of the day"
+11. No names: Never address the original poster or anyone else by name. Avoid using personal names in the comment entirely.
 
 ## WHAT MAKES A GOOD COMMENT
 - Adds one specific angle OP didn't mention
@@ -40,3 +41,4 @@
 - [ ] Ends clean — reaction, specific question, or nothing
 - [ ] Reads like Yuvraj typed it, not generated it
 - [ ] Relevance check: Verified it is directly related to the post detail
+- [ ] No names: Contains no personal names or direct addressing

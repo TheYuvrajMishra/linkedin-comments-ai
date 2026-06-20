@@ -1,6 +1,7 @@
 // Content script for LinkedIn AI Comment Generator
 
 const SPARKLE_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M12 3c.132 0 .263 0 .393.007a7.5 7.5 0 0 0 7.92 7.92c.11.002.22.003.33.003a.75.75 0 0 1 0 1.5c-.11 0-.22 0-.33.003a7.5 7.5 0 0 0-7.92 7.92c-.007.13-.007.261-.007.391a.75.75 0 0 1-1.5 0c0-.13 0-.261-.007-.391a7.5 7.5 0 0 0-7.92-7.92C2.86 12.44 2.75 12.43 2.64 12.43a.75.75 0 0 1 0-1.5c.11 0 .22-.001.33-.003a7.5 7.5 0 0 0 7.92-7.92C10.9 3.004 11.03 3 11.16 3a.75.75 0 0 1 .84 0Z"/></svg>`;
+const REGEN_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
 
 // Inlined CSS for Shadow DOM styling
 const SHADOW_CSS = `
@@ -505,6 +506,7 @@ function injectAIElements(editor) {
   // State Management
   let currentTone = "insightful";
   let isGenerating = false;
+  let hasGenerated = false;
 
   // Retrieve last selected tone from storage
   chrome.storage.local.get("defaultTone", (data) => {
@@ -520,6 +522,7 @@ function injectAIElements(editor) {
   }
 
   updateToneUI();
+  updateButtonUI();
 
   // Dropdown Toggle (using portal dropdown to prevent layout clipping)
   toneTrigger.addEventListener("click", (e) => {
@@ -534,6 +537,9 @@ function injectAIElements(editor) {
       currentTone = selectedToneId;
       chrome.storage.local.set({ defaultTone: selectedToneId });
       updateToneUI();
+      // Reset generated state if tone changes to let them do a fresh standard generate (cached if exists)
+      hasGenerated = false;
+      updateButtonUI();
     });
   });
 
@@ -571,7 +577,8 @@ function injectAIElements(editor) {
     genBtn.title = `Scraped Text:\n"${postText}"`;
 
     // Enter loading state
-    setLoadingState(true);
+    isGenerating = true;
+    updateButtonUI();
 
     // Fetch custom instructions if any
     chrome.storage.local.get("customInstructions", (data) => {
@@ -580,7 +587,8 @@ function injectAIElements(editor) {
       console.log("LinkAI: Sending generation request:", {
         postText: postText,
         tone: currentTone,
-        customInstructions: customInstructions
+        customInstructions: customInstructions,
+        regenerate: hasGenerated
       });
 
       // Send generation request to background script
@@ -589,22 +597,27 @@ function injectAIElements(editor) {
           action: "generateComment",
           postText: postText,
           tone: currentTone,
-          customInstructions: customInstructions
+          customInstructions: customInstructions,
+          regenerate: hasGenerated
         },
         (response) => {
-          setLoadingState(false);
+          isGenerating = false;
 
           if (chrome.runtime.lastError) {
             console.error("Message delivery failed:", chrome.runtime.lastError);
+            updateButtonUI();
             showStatus("Connection error.", "error");
             return;
           }
 
           if (response && response.success) {
+            hasGenerated = true;
+            updateButtonUI();
             autofillDraftJSEditor(editor, response.comment);
             showStatus("Completed", "success");
             setTimeout(() => showStatus("", ""), 3000);
           } else {
+            updateButtonUI();
             const errorMsg = response?.error || "Generation failed.";
             showStatus(errorMsg, "error");
           }
@@ -614,12 +627,13 @@ function injectAIElements(editor) {
   });
 
   // UI state change helpers
-  function setLoadingState(loading) {
-    isGenerating = loading;
-    genBtn.disabled = loading;
-    toneTrigger.disabled = loading;
-    if (loading) {
+  function updateButtonUI() {
+    genBtn.disabled = isGenerating;
+    toneTrigger.disabled = isGenerating;
+    if (isGenerating) {
       genBtn.innerHTML = `<span class="linkai-spinner"></span><span class="linkai-btn-text">generating...</span>`;
+    } else if (hasGenerated) {
+      genBtn.innerHTML = `<span class="linkai-btn-icon">${REGEN_SVG}</span><span class="linkai-btn-text">regenerate</span>`;
     } else {
       genBtn.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">generate</span>`;
     }

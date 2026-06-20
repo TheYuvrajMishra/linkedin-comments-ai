@@ -50,6 +50,7 @@ This checklist is used to verify implementation correctness at each phase of dev
 - [x] **System Prompt Efficiency:** Ensure system prompt enforces:
   - Conciseness (1-2 sentences, max 25 words).
   - Raw text only (no quotes, greeting text, or conversational explanations).
+  - No personal names or direct addressing of the OP.
 - [x] **Caching:** Memory-based caching implemented to store generated comments by post URN/ID to prevent multiple duplicate requests for the same post.
 - [x] **HTTP 429 Rate Limit Handling:**
   - [x] Read `retry-after` header if 429 status is returned.
