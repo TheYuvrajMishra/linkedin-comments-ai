@@ -1,6 +1,6 @@
 // Content script for LinkedIn AI Comment Generator
 
-const SPARKLE_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M9 2.5a.5.5 0 0 1 1 0l.9 3.1 3.1.9a.5.5 0 0 1 0 1l-3.1.9-.9 3.1a.5.5 0 0 1-1 0l-.9-3.1-3.1-.9a.5.5 0 0 1 0-1l3.1-.9.9-3.1zm10.5 8a.5.5 0 0 1 1 0l.45 1.55 1.55.45a.5.5 0 0 1 0 1l-1.55.45-.45 1.55a.5.5 0 0 1-1 0l-.45-1.55-1.55-.45a.5.5 0 0 1 0-1l1.55-.45.45-1.55zM15 15.5a.5.5 0 0 1 1 0l.45 1.55 1.55.45a.5.5 0 0 1 0 1l-1.55.45-.45 1.55a.5.5 0 0 1-1 0l-.45-1.55-1.55-.45a.5.5 0 0 1 0-1l1.55-.45.45-1.55z"/></svg>`;
+const SPARKLE_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M12 3c.132 0 .263 0 .393.007a7.5 7.5 0 0 0 7.92 7.92c.11.002.22.003.33.003a.75.75 0 0 1 0 1.5c-.11 0-.22 0-.33.003a7.5 7.5 0 0 0-7.92 7.92c-.007.13-.007.261-.007.391a.75.75 0 0 1-1.5 0c0-.13 0-.261-.007-.391a7.5 7.5 0 0 0-7.92-7.92C2.86 12.44 2.75 12.43 2.64 12.43a.75.75 0 0 1 0-1.5c.11 0 .22-.001.33-.003a7.5 7.5 0 0 0 7.92-7.92C10.9 3.004 11.03 3 11.16 3a.75.75 0 0 1 .84 0Z"/></svg>`;
 
 // Inlined CSS for Shadow DOM styling
 const SHADOW_CSS = `
