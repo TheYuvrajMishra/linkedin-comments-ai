@@ -260,10 +260,10 @@ function showToneDropdownPortal(triggerElement, currentTone, onSelect) {
   
   // Style portal
   portal.style.position = "fixed";
-  portal.style.background = "#111827";
-  portal.style.border = "1px solid rgba(255, 255, 255, 0.15)";
+  portal.style.background = "#121214";
+  portal.style.border = "1px solid rgba(255, 255, 255, 0.12)";
   portal.style.borderRadius = "12px";
-  portal.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.4)";
+  portal.style.boxShadow = "0 10px 25px rgba(0, 0, 0, 0.5)";
   portal.style.padding = "6px";
   portal.style.minWidth = "145px";
   portal.style.zIndex = "999999";
@@ -272,6 +272,8 @@ function showToneDropdownPortal(triggerElement, currentTone, onSelect) {
   portal.style.gap = "2px";
   portal.style.fontFamily = "-apple-system, system-ui, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
   portal.style.boxSizing = "border-box";
+  portal.style.backdropFilter = "blur(12px)";
+  portal.style.webkitBackdropFilter = "blur(12px)";
   
   // Render options
   TONES.forEach(tone => {
@@ -280,8 +282,8 @@ function showToneDropdownPortal(triggerElement, currentTone, onSelect) {
     item.style.alignItems = "center";
     item.style.gap = "8px";
     item.style.padding = "8px 10px";
-    item.style.color = tone.id === currentTone ? "#60a5fa" : "#d1d5db";
-    item.style.background = tone.id === currentTone ? "rgba(10, 102, 194, 0.25)" : "transparent";
+    item.style.color = tone.id === currentTone ? "#ffffff" : "#d1d5db";
+    item.style.background = tone.id === currentTone ? "rgba(255, 255, 255, 0.15)" : "transparent";
     item.style.fontSize = "12px";
     item.style.fontWeight = tone.id === currentTone ? "600" : "500";
     item.style.cursor = "pointer";
@@ -292,12 +294,12 @@ function showToneDropdownPortal(triggerElement, currentTone, onSelect) {
     
     // Hover styling
     item.addEventListener("mouseenter", () => {
-      item.style.background = "rgba(59, 130, 246, 0.18)";
+      item.style.background = "rgba(255, 255, 255, 0.08)";
       item.style.color = "#ffffff";
     });
     item.addEventListener("mouseleave", () => {
-      item.style.background = tone.id === currentTone ? "rgba(10, 102, 194, 0.25)" : "transparent";
-      item.style.color = tone.id === currentTone ? "#60a5fa" : "#d1d5db";
+      item.style.background = tone.id === currentTone ? "rgba(255, 255, 255, 0.15)" : "transparent";
+      item.style.color = tone.id === currentTone ? "#ffffff" : "#d1d5db";
     });
     
     item.addEventListener("click", (e) => {

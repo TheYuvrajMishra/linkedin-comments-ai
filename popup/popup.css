@@ -258,6 +258,11 @@ select {
   padding-right: 30px;
 }
 
+select option {
+  background-color: #121214;
+  color: #f5f5f7;
+}
+
 .select-wrapper::after {
   content: "▼";
   font-size: 7px;
