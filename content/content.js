@@ -937,67 +937,81 @@ function autofillDraftJSEditor(editor, text) {
   // Focus the input
   editor.focus();
 
-  // Clear existing content first to prepare for the typing stream
-  try {
-    document.execCommand("selectAll", false, null);
-    document.execCommand("insertText", false, "");
-  } catch (e) {
-    editor.innerText = "";
-  }
-
-  // Tokenize text into words and whitespaces to preserve formatting
-  const tokens = text.split(/(\s+)/).filter(Boolean);
-  let tokenIndex = 0;
-
-  function typeNextToken() {
-    // Safety check: abort if editor has been removed from DOM during the typing stream
-    if (!document.body.contains(editor)) {
-      return;
+  // Step 1: Wait 150ms for initial focus events to settle
+  setTimeout(() => {
+    // Clear existing content first to prepare for the typing stream
+    try {
+      document.execCommand("selectAll", false, null);
+      document.execCommand("insertText", false, "");
+    } catch (e) {
+      editor.innerText = "";
     }
 
-    if (tokenIndex < tokens.length) {
-      const token = tokens[tokenIndex];
-      let success = false;
+    // Notify Draft.js of selection clear
+    editor.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
 
-      try {
-        success = document.execCommand("insertText", false, token);
-      } catch (e) {
-        console.error("LinkAI: execCommand token insert failed", e);
-      }
-
-      if (!success) {
-        // Fallback: direct innerText append
-        editor.innerText += token;
-      }
-
-      // Dispatch input event to notify Draft.js/React framework of DOM modification
-      const inputEvent = new Event("input", { bubbles: true, cancelable: true });
-      editor.dispatchEvent(inputEvent);
-
-      tokenIndex++;
-
-      // Use a natural variable delay to simulate real-time generation (50ms to 90ms)
-      const delay = 50 + Math.random() * 40;
-      setTimeout(typeNextToken, delay);
-    } else {
-      // Typing complete - send final input and key events to finalize editor state
-      const finalInputEvent = new Event("input", { bubbles: true, cancelable: true });
-      editor.dispatchEvent(finalInputEvent);
-
-      const keyUpEvent = new KeyboardEvent("keyup", {
-        bubbles: true,
-        cancelable: true,
-        key: " ",
-        code: "Space",
-        keyCode: 32
+    // Step 2: Wait 200ms for Draft.js to reconcile the cleared editor state
+    setTimeout(() => {
+      // Tokenize text into words and whitespaces to preserve formatting
+      // Normalize any newline characters inside whitespace tokens to spaces to prevent browser formatting drops
+      const tokens = text.split(/(\s+)/).filter(Boolean).map(t => {
+        if (/^\s+$/.test(t)) {
+          return t.replace(/\r?\n/g, " ");
+        }
+        return t;
       });
-      editor.dispatchEvent(keyUpEvent);
-      console.log("LinkAI: Finished typing comment successfully.");
-    }
-  }
+      let tokenIndex = 0;
 
-  // Start typing loop
-  typeNextToken();
+      function typeNextToken() {
+        // Safety check: abort if editor has been removed from DOM during the typing stream
+        if (!document.body.contains(editor)) {
+          return;
+        }
+
+        if (tokenIndex < tokens.length) {
+          const token = tokens[tokenIndex];
+          let success = false;
+
+          try {
+            success = document.execCommand("insertText", false, token);
+          } catch (e) {
+            console.error("LinkAI: execCommand token insert failed", e);
+          }
+
+          if (!success) {
+            // Fallback: direct innerText append
+            editor.innerText += token;
+          }
+
+          // Dispatch input event to notify Draft.js/React framework of DOM modification
+          editor.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+
+          tokenIndex++;
+
+          // Step 3: Wait 250ms after typing the very first token to let state reconcile, 
+          // then resume with the natural typing speed delay (50ms to 90ms) for subsequent tokens.
+          const delay = (tokenIndex === 1) ? 250 : 50 + Math.random() * 40;
+          setTimeout(typeNextToken, delay);
+        } else {
+          // Typing complete - send final input and key events to finalize editor state
+          editor.dispatchEvent(new Event("input", { bubbles: true, cancelable: true }));
+
+          const keyUpEvent = new KeyboardEvent("keyup", {
+            bubbles: true,
+            cancelable: true,
+            key: " ",
+            code: "Space",
+            keyCode: 32
+          });
+          editor.dispatchEvent(keyUpEvent);
+          console.log("LinkAI: Finished typing comment successfully.");
+        }
+      }
+
+      // Start typing loop
+      typeNextToken();
+    }, 200);
+  }, 150);
 }
 
 // Start helper to wait for page to settle and hydrate before running init
