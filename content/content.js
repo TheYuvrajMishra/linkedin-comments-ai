@@ -572,7 +572,6 @@ function injectAIElements(editor) {
 
     // Enter loading state
     setLoadingState(true);
-    showStatus(`Analyzing: "${postText.slice(0, 25)}..."`, "");
 
     // Fetch custom instructions if any
     chrome.storage.local.get("customInstructions", (data) => {
@@ -603,7 +602,7 @@ function injectAIElements(editor) {
 
           if (response && response.success) {
             autofillDraftJSEditor(editor, response.comment);
-            showStatus("Completed ✨", "success");
+            showStatus("Completed", "success");
             setTimeout(() => showStatus("", ""), 3000);
           } else {
             const errorMsg = response?.error || "Generation failed.";
@@ -933,72 +932,72 @@ function getCleanText(element) {
   return extractTextWithoutSelectors(element, ignoreSelectors);
 }
 
-// Bypasses React state framework by trying multiple insertion techniques (execCommand, Paste simulation, and direct DOM write with event dispatch)
+// Bypasses React state framework by simulating a natural word-by-word typing stream that synchronizes perfectly with React, Draft.js, and Lexical editor states.
 function autofillDraftJSEditor(editor, text) {
   // Focus the input
   editor.focus();
 
-  // Method 1: execCommand "selectAll" then "insertText" (Most reliable for React / Draft.js / Lexical state sync)
+  // Clear existing content first to prepare for the typing stream
   try {
     document.execCommand("selectAll", false, null);
-    const success = document.execCommand("insertText", false, text);
-    
-    if (success && editor.textContent.trim() === text.trim()) {
-      console.log("LinkAI: Text inserted successfully via execCommand");
-      
-      // Trigger backup input notifications
+    document.execCommand("insertText", false, "");
+  } catch (e) {
+    editor.innerText = "";
+  }
+
+  // Tokenize text into words and whitespaces to preserve formatting
+  const tokens = text.split(/(\s+)/).filter(Boolean);
+  let tokenIndex = 0;
+
+  function typeNextToken() {
+    // Safety check: abort if editor has been removed from DOM during the typing stream
+    if (!document.body.contains(editor)) {
+      return;
+    }
+
+    if (tokenIndex < tokens.length) {
+      const token = tokens[tokenIndex];
+      let success = false;
+
+      try {
+        success = document.execCommand("insertText", false, token);
+      } catch (e) {
+        console.error("LinkAI: execCommand token insert failed", e);
+      }
+
+      if (!success) {
+        // Fallback: direct innerText append
+        editor.innerText += token;
+      }
+
+      // Dispatch input event to notify Draft.js/React framework of DOM modification
       const inputEvent = new Event("input", { bubbles: true, cancelable: true });
       editor.dispatchEvent(inputEvent);
-      return;
+
+      tokenIndex++;
+
+      // Use a natural variable delay to simulate real-time generation (50ms to 90ms)
+      const delay = 50 + Math.random() * 40;
+      setTimeout(typeNextToken, delay);
+    } else {
+      // Typing complete - send final input and key events to finalize editor state
+      const finalInputEvent = new Event("input", { bubbles: true, cancelable: true });
+      editor.dispatchEvent(finalInputEvent);
+
+      const keyUpEvent = new KeyboardEvent("keyup", {
+        bubbles: true,
+        cancelable: true,
+        key: " ",
+        code: "Space",
+        keyCode: 32
+      });
+      editor.dispatchEvent(keyUpEvent);
+      console.log("LinkAI: Finished typing comment successfully.");
     }
-  } catch (e) {
-    console.error("LinkAI: execCommand failed", e);
   }
 
-  // Method 2: Clipboard Event (Paste simulation)
-  try {
-    const dataTransfer = new DataTransfer();
-    dataTransfer.setData("text/plain", text);
-    
-    const pasteEvent = new ClipboardEvent("paste", {
-      clipboardData: dataTransfer,
-      bubbles: true,
-      cancelable: true
-    });
-    editor.dispatchEvent(pasteEvent);
-    
-    if (editor.textContent.trim() === text.trim()) {
-      console.log("LinkAI: Text inserted successfully via Paste Event");
-      return;
-    }
-  } catch (e) {
-    console.error("LinkAI: Paste Event failed", e);
-  }
-
-  // Method 3: Direct DOM manipulation with input event dispatch (for React/Lexical fallback)
-  try {
-    editor.innerText = text;
-    
-    const inputEvent = new Event("input", {
-      bubbles: true,
-      cancelable: true
-    });
-    editor.dispatchEvent(inputEvent);
-    
-    // Keystroke simulation backup
-    const keyUpEvent = new KeyboardEvent("keyup", {
-      bubbles: true,
-      cancelable: true,
-      key: " ",
-      code: "Space",
-      keyCode: 32
-    });
-    editor.dispatchEvent(keyUpEvent);
-    
-    console.log("LinkAI: Text inserted via direct DOM write and input event");
-  } catch (e) {
-    console.error("LinkAI: Direct DOM write failed", e);
-  }
+  // Start typing loop
+  typeNextToken();
 }
 
 // Start helper to wait for page to settle and hydrate before running init

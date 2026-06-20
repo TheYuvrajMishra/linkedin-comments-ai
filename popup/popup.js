@@ -69,7 +69,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       // Trigger visual save success animation
       const originalText = saveBtn.querySelector("span").textContent;
       saveBtn.classList.add("success");
-      saveBtn.querySelector("span").textContent = "Preferences Saved! ✨";
+      saveBtn.querySelector("span").textContent = "Preferences Saved!";
       saveBtn.disabled = true;
 
       setTimeout(() => {
