@@ -1,5 +1,7 @@
 // Content script for LinkedIn AI Comment Generator
 
+const SPARKLE_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M9 2.5a.5.5 0 0 1 1 0l.9 3.1 3.1.9a.5.5 0 0 1 0 1l-3.1.9-.9 3.1a.5.5 0 0 1-1 0l-.9-3.1-3.1-.9a.5.5 0 0 1 0-1l3.1-.9.9-3.1zm10.5 8a.5.5 0 0 1 1 0l.45 1.55 1.55.45a.5.5 0 0 1 0 1l-1.55.45-.45 1.55a.5.5 0 0 1-1 0l-.45-1.55-1.55-.45a.5.5 0 0 1 0-1l1.55-.45.45-1.55zM15 15.5a.5.5 0 0 1 1 0l.45 1.55 1.55.45a.5.5 0 0 1 0 1l-1.55.45-.45 1.55a.5.5 0 0 1-1 0l-.45-1.55-1.55-.45a.5.5 0 0 1 0-1l1.55-.45.45-1.55z"/></svg>`;
+
 // Inlined CSS for Shadow DOM styling
 const SHADOW_CSS = `
 .linkai-container {
@@ -14,44 +16,51 @@ const SHADOW_CSS = `
 .linkai-btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: linear-gradient(135deg, #0a66c2, #1d4ed8);
-  color: #ffffff;
+  gap: 5px;
+  background: transparent;
+  color: #8e8e93;
   border: none;
-  border-radius: 16px;
-  padding: 6px 12px;
+  border-radius: 6px;
+  padding: 4px 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(10, 102, 194, 0.3);
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: none;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   outline: none;
-  height: 32px;
+  height: 28px;
   white-space: nowrap;
 }
 
 .linkai-btn:hover:not(:disabled) {
-  background: linear-gradient(135deg, #0b76e2, #2563eb);
-  box-shadow: 0 4px 10px rgba(10, 102, 194, 0.45), 0 0 0 2px rgba(59, 130, 246, 0.3);
-  transform: translateY(-1px);
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.04);
 }
 
-.linkai-btn:active:not(:disabled) {
-  transform: translateY(1px);
+:host-context([class*="theme--dark"]) .linkai-btn {
+  color: #9ca3af;
+}
+
+:host-context([class*="theme--dark"]) .linkai-btn:hover:not(:disabled) {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .linkai-btn:disabled {
-  background: #ccd0d5;
-  color: #8c8c8c;
+  color: #ccd0d5;
   cursor: not-allowed;
+  background: transparent;
   box-shadow: none;
   transform: none;
 }
 
 .linkai-btn-icon {
-  font-size: 13px;
-  display: inline-block;
-  transition: transform 0.3s ease;
+  width: 13px;
+  height: 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 .linkai-btn:hover:not(:disabled) .linkai-btn-icon {
@@ -59,38 +68,40 @@ const SHADOW_CSS = `
 }
 
 .linkai-tone-trigger {
-  background: rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.15);
-  color: #5e5e5e;
-  border-radius: 16px;
-  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  color: #8e8e93;
+  border-radius: 6px;
+  padding: 4px 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  height: 32px;
+  height: 28px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  transition: all 0.2s;
+  gap: 5px;
+  transition: all 0.4s cubic-bezier(0.32, 0.72, 0, 1);
   margin-left: 4px;
   white-space: nowrap;
 }
 
-/* Check dark mode class on host context if applicable */
 :host-context([class*="theme--dark"]) .linkai-tone-trigger {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #e1e1e1;
+  color: #9ca3af;
 }
 
 .linkai-tone-trigger:hover {
-  background: rgba(0, 0, 0, 0.1);
-  color: #2b2b2b;
+  color: #0f172a;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+:host-context([class*="theme--dark"]) .linkai-tone-trigger:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .linkai-dropdown {
   position: absolute;
-  bottom: 38px;
+  bottom: 34px;
   left: 0;
   background: #111827;
   border: 1px solid rgba(255, 255, 255, 0.15);
@@ -126,13 +137,13 @@ const SHADOW_CSS = `
 }
 
 .linkai-item:hover {
-  background: rgba(59, 130, 246, 0.18);
+  background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
 .linkai-item.selected {
-  background: rgba(10, 102, 194, 0.25);
-  color: #60a5fa;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
   font-weight: 600;
 }
 
@@ -148,21 +159,26 @@ const SHADOW_CSS = `
 }
 
 .linkai-status.error {
-  color: #ef4444 !important;
+  color: #8e8e93 !important;
 }
 
 .linkai-status.success {
-  color: #10b981 !important;
+  color: #ffffff !important;
 }
 
 .linkai-spinner {
   width: 12px;
   height: 12px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(0, 0, 0, 0.15);
   border-radius: 50%;
-  border-top-color: #fff;
+  border-top-color: #8a8a8a;
   animation: spin 0.8s linear infinite;
   display: inline-block;
+}
+
+:host-context([class*="theme--dark"]) .linkai-spinner {
+  border-color: rgba(255, 255, 255, 0.15);
+  border-top-color: #9ca3af;
 }
 
 @keyframes spin {
@@ -453,7 +469,7 @@ function injectAIElements(editor) {
   const genBtn = document.createElement("button");
   genBtn.type = "button";
   genBtn.className = "linkai-btn";
-  genBtn.innerHTML = `<span class="linkai-btn-icon">✨</span><span class="linkai-btn-text">Generate AI</span>`;
+  genBtn.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">generate</span>`;
   
   // Tone Dropdown Trigger Button
   const toneTrigger = document.createElement("button");
@@ -498,7 +514,7 @@ function injectAIElements(editor) {
 
   function updateToneUI() {
     const activeTone = TONES.find(t => t.id === currentTone) || TONES[0];
-    toneTrigger.innerHTML = `${activeTone.emoji} ${activeTone.label} <span style="font-size: 8px; margin-left: 2px;">▼</span>`;
+    toneTrigger.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">${activeTone.label.toLowerCase()}</span><span style="font-size: 8px; margin-left: 2px; opacity: 0.6;">▼</span>`;
   }
 
   updateToneUI();
@@ -602,9 +618,9 @@ function injectAIElements(editor) {
     genBtn.disabled = loading;
     toneTrigger.disabled = loading;
     if (loading) {
-      genBtn.innerHTML = `<span class="linkai-spinner"></span><span>Working...</span>`;
+      genBtn.innerHTML = `<span class="linkai-spinner"></span><span class="linkai-btn-text">generating...</span>`;
     } else {
-      genBtn.innerHTML = `<span class="linkai-btn-icon">✨</span><span class="linkai-btn-text">Generate AI</span>`;
+      genBtn.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">generate</span>`;
     }
   }
 
