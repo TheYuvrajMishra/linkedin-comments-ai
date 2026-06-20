@@ -48,7 +48,7 @@ This checklist is used to verify implementation correctness at each phase of dev
 - [x] **Input Token Pruning:** Explicitly truncate extracted post text to a maximum length (e.g., 1000 characters) before sending to LLM.
 - [x] **Model selection:** Hardcoded/default model configured to `llama-3.1-8b-instant` or similar fast/low-cost model.
 - [x] **System Prompt Efficiency:** Ensure system prompt enforces:
-  - Conciseness (1-3 sentences).
+  - Conciseness (1-2 sentences, max 25 words).
   - Raw text only (no quotes, greeting text, or conversational explanations).
 - [x] **Caching:** Memory-based caching implemented to store generated comments by post URN/ID to prevent multiple duplicate requests for the same post.
 - [x] **HTTP 429 Rate Limit Handling:**
