@@ -1,0 +1,188 @@
+/* CSS Styles for the Injected LinkedIn AI Comment Generator UI */
+/* These styles will be loaded inside the Shadow DOM to keep them isolated */
+
+.linkai-container {
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", "Fira Sans", Ubuntu, Oxygen, "Oxygen Sans", Cantarell, "Droid Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Lucida Grande", Helvetica, Arial, sans-serif;
+  margin-right: 8px;
+}
+
+/* Action button style */
+.linkai-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: linear-gradient(135deg, #0a66c2, #1d4ed8);
+  color: #ffffff;
+  border: none;
+  border-radius: 16px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(10, 102, 194, 0.3);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  outline: none;
+  height: 32px;
+  white-space: nowrap;
+}
+
+.linkai-btn:hover {
+  background: linear-gradient(135deg, #0b76e2, #2563eb);
+  box-shadow: 0 4px 10px rgba(10, 102, 194, 0.45), 0 0 0 2px rgba(59, 130, 246, 0.3);
+  transform: translateY(-1px);
+}
+
+.linkai-btn:active {
+  transform: translateY(1px);
+}
+
+.linkai-btn:disabled {
+  background: #e0e0e0;
+  color: #8c8c8c;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+.linkai-btn-icon {
+  font-size: 13px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.linkai-btn:hover:not(:disabled) .linkai-btn-icon {
+  transform: rotate(15deg) scale(1.1);
+}
+
+/* Dropdown trigger button */
+.linkai-tone-trigger {
+  background: rgba(0, 0, 0, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  color: #5e5e5e;
+  border-radius: 16px;
+  padding: 6px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.2s;
+  margin-left: 4px;
+}
+
+/* Dark mode compatibility for native elements */
+:host-context([class*="theme--dark"]) .linkai-tone-trigger {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+  color: #e1e1e1;
+}
+
+.linkai-tone-trigger:hover {
+  background: rgba(0, 0, 0, 0.1);
+  color: #2b2b2b;
+}
+
+:host-context([class*="theme--dark"]) .linkai-tone-trigger:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+/* Dropdown Menu styling */
+.linkai-dropdown {
+  position: absolute;
+  bottom: 38px;
+  left: 0;
+  background: #111827;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  padding: 6px;
+  min-width: 140px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 10000;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.linkai-dropdown.show {
+  display: flex;
+}
+
+.linkai-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  color: #d1d5db;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.linkai-item:hover {
+  background: rgba(59, 130, 246, 0.15);
+  color: #ffffff;
+}
+
+.linkai-item.selected {
+  background: rgba(10, 102, 194, 0.2);
+  color: #60a5fa;
+  font-weight: 600;
+}
+
+/* Status overlays and error tags */
+.linkai-status {
+  font-size: 11px;
+  color: #6b7280;
+  margin-left: 8px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+:host-context([class*="theme--dark"]) .linkai-status {
+  color: #9ca3af;
+}
+
+.linkai-error {
+  color: #ef4444 !important;
+}
+
+/* Spinner animation */
+.linkai-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #fff;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
