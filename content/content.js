@@ -578,7 +578,7 @@ function injectAIElements(editor) {
     }
 
     // Set a tooltip to visually verify the entire scraped text on hover
-    genBtn.title = `Scraped Text:\n"${postText}"`;
+    genBtn.title = `Click to Generate Comment"`;
 
     // Enter loading state
     isGenerating = true;
