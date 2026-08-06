@@ -1,5 +1,26 @@
-/* CSS Styles for the Injected LinkedIn AI Comment Generator UI */
-/* These styles will be loaded inside the Shadow DOM to keep them isolated */
+/* Custom Thin Dark Scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
 
 .linkai-container {
   display: inline-flex;

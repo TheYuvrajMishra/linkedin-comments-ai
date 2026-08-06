@@ -5,6 +5,15 @@ const REGEN_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" s
 
 // Inlined CSS for Shadow DOM styling
 const SHADOW_CSS = `
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #27272a; border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
 .linkai-container {
   display: inline-flex;
   align-items: center;

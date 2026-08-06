@@ -1,38 +1,59 @@
-/* Ethereal Minimalist Design System */
+/* Ethereal Monochrome & Dark Tone Design System */
 :root {
-  --bg-color: #070709;
-  --text-primary: #f5f5f7;
-  --text-secondary: #86868b;
-  --accent-color: #ffffff;
-  --accent-glow: rgba(255, 255, 255, 0.08);
-  --border-color: rgba(255, 255, 255, 0.08);
-  --border-focus: rgba(255, 255, 255, 0.22);
-  --input-bg: rgba(255, 255, 255, 0.03);
+  --bg-color: #09090b;
+  --card-bg: #121215;
+  --text-primary: #ededef;
+  --text-secondary: #71717a;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-hover: rgba(255, 255, 255, 0.16);
+  --input-bg: #18181c;
   --font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Thin Dark Scrollbars */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #27272a transparent;
+}
+
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #27272a;
+  border-radius: 999px;
+  transition: background 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
 }
 
 body {
-  width: 350px;
+  width: 340px;
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-family: var(--font-family);
-  font-size: 13px;
+  font-size: 12px;
   line-height: 1.5;
   overflow-x: hidden;
 }
 
 .app-container {
-  padding: 20px 18px;
+  padding: 18px 16px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 /* Header */
@@ -45,24 +66,24 @@ body {
 .logo-area {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 .logo-circle {
-  width: 32px;
-  height: 32px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
+  width: 28px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: 7px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .logo-text h1 {
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
   color: #fff;
 }
 
@@ -70,29 +91,29 @@ body {
   font-size: 9px;
   color: var(--text-secondary);
   font-weight: 500;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.03em;
   text-transform: uppercase;
 }
 
 .status-badge {
   font-size: 9px;
   font-weight: 600;
-  padding: 3px 8px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 7px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
   color: #a1a1aa;
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
 }
 
-/* Account & Subscription Minimal Card */
+/* Account & Subscription Card (Deep Matte Dark) */
 .account-card {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 14px;
-  padding: 14px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 10px;
 }
 
 .account-header {
@@ -104,68 +125,68 @@ body {
 .user-profile {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .user-email {
   font-size: 11px;
   font-weight: 500;
   color: var(--text-primary);
-  max-width: 160px;
+  max-width: 150px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
 .plan-pill {
-  font-size: 9px;
+  font-size: 8px;
   font-weight: 700;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #fff;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #d4d4d8;
+  border: 1px solid var(--border-subtle);
+  letter-spacing: 0.05em;
 }
 
-/* Google Sign-in Button - Ultra Minimal */
+/* Google Sign-in Button - Matte Dark */
 .google-login-btn {
   width: 100%;
-  height: 34px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  color: #fff;
+  height: 32px;
+  background: #18181c;
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  color: var(--text-primary);
   font-family: var(--font-family);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: all 0.3s var(--ease-spring);
+  transition: all 0.2s var(--ease-spring);
 }
 
 .google-login-btn:hover {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
+  background: #232328;
+  border-color: var(--border-hover);
 }
 
 .logout-btn {
   background: none;
   border: none;
-  color: #71717a;
-  font-size: 10px;
+  color: #52525b;
+  font-size: 9px;
   cursor: pointer;
   transition: color 0.2s;
 }
 
 .logout-btn:hover {
-  color: #f43f5e;
+  color: #e4e4e7;
 }
 
-/* Quota Bar */
+/* Quota Bar (Clean Solid Bar, No Cheesy Gradients) */
 .quota-bar-container {
   display: flex;
   flex-direction: column;
@@ -181,23 +202,23 @@ body {
 
 .quota-progress-bg {
   width: 100%;
-  height: 5px;
-  background: rgba(255, 255, 255, 0.06);
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
   border-radius: 999px;
   overflow: hidden;
 }
 
 .quota-progress-fill {
   height: 100%;
-  background: linear-gradient(90deg, #6366f1, #a855f7);
+  background: #e4e4e7;
   border-radius: 999px;
   transition: width 0.4s var(--ease-spring);
 }
 
-/* Minimal Upgrade Buttons */
+/* Upgrade Buttons - Solid Dark Slate & Charcoal */
 .upgrade-action-row {
   display: flex;
-  gap: 8px;
+  gap: 6px;
 }
 
 .upgrade-btn {
@@ -205,55 +226,56 @@ body {
   text-align: center;
   font-size: 10px;
   font-weight: 600;
-  padding: 7px 10px;
-  border-radius: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
   text-decoration: none;
-  transition: all 0.3s var(--ease-spring);
+  transition: all 0.2s var(--ease-spring);
 }
 
 .upgrade-btn.pro-btn {
-  background: rgba(99, 102, 241, 0.12);
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  background: #1c1c22;
+  color: #d4d4d8;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .upgrade-btn.pro-btn:hover {
-  background: rgba(99, 102, 241, 0.22);
+  background: #272730;
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .upgrade-btn.ultra-btn {
-  background: rgba(236, 72, 153, 0.12);
-  color: #f472b6;
-  border: 1px solid rgba(236, 72, 153, 0.25);
+  background: #27272a;
+  color: #f4f4f5;
+  border: 1px solid rgba(255, 255, 255, 0.14);
 }
 
 .upgrade-btn.ultra-btn:hover {
-  background: rgba(236, 72, 153, 0.22);
+  background: #3f3f46;
   color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
 }
 
 /* Double Bezel Outer Container */
 .double-bezel-outer {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-radius: 18px;
-  padding: 3px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 1px;
 }
 
 .app-main {
-  background: rgba(10, 10, 12, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: 15px;
-  padding: 16px 14px;
+  background: var(--card-bg);
+  border-radius: 11px;
+  padding: 14px;
 }
 
 /* Form inputs */
 .form-group {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 14px;
+  gap: 5px;
+  margin-bottom: 12px;
 }
 
 .label-row {
@@ -263,19 +285,19 @@ body {
 }
 
 label {
-  font-size: 10px;
-  font-weight: 500;
+  font-size: 9px;
+  font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.04em;
 }
 
 .helper-link {
-  font-size: 10px;
+  font-size: 9px;
   color: var(--text-secondary);
   text-decoration: none;
   font-weight: 500;
-  transition: color 0.3s;
+  transition: color 0.2s;
 }
 
 .helper-link:hover {
@@ -293,25 +315,25 @@ textarea,
 select {
   width: 100%;
   background: var(--input-bg);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 8px;
-  padding: 9px 12px;
-  color: #fff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text-primary);
   font-family: var(--font-family);
-  font-size: 12px;
+  font-size: 11px;
   outline: none;
-  transition: all 0.3s var(--ease-spring);
+  transition: all 0.2s var(--ease-spring);
 }
 
 input[type="password"] {
-  padding-right: 36px;
+  padding-right: 32px;
 }
 
 input:focus,
 textarea:focus,
 select:focus {
-  border-color: var(--border-focus);
-  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--border-hover);
+  background: #1f1f24;
 }
 
 .toggle-password {
@@ -335,11 +357,11 @@ select:focus {
 select {
   appearance: none;
   cursor: pointer;
-  padding-right: 28px;
+  padding-right: 24px;
 }
 
 select option {
-  background: #111;
+  background: #18181b;
   color: #fff;
 }
 
@@ -347,7 +369,7 @@ select option {
   content: "▼";
   font-size: 7px;
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
   color: var(--text-secondary);
@@ -359,24 +381,23 @@ textarea {
   font-size: 11px;
 }
 
-/* Save Button */
+/* Save Button (Monochrome Dark Slate) */
 .save-button {
   width: 100%;
-  height: 36px;
-  background: #f5f5f7;
+  height: 34px;
+  background: #e4e4e7;
   border: none;
-  border-radius: 9999px;
-  color: #000;
+  border-radius: 6px;
+  color: #09090b;
   font-family: var(--font-family);
   font-weight: 600;
-  font-size: 12px;
+  font-size: 11px;
   cursor: pointer;
-  transition: all 0.3s var(--ease-spring);
+  transition: all 0.2s var(--ease-spring);
 }
 
 .save-button:hover {
   background: #ffffff;
-  transform: translateY(-1px);
 }
 
 .save-button.success {
@@ -389,6 +410,6 @@ textarea {
 }
 
 .app-footer p {
-  font-size: 9px;
-  color: var(--text-secondary);
+  font-size: 8px;
+  color: #52525b;
 }
