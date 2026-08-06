@@ -1,16 +1,25 @@
 {
   "manifest_version": 3,
-  "name": "LinkedIn AI Comment Generator",
+  "name": "Eloquix - LinkedIn AI Comment Generator",
   "version": "1.0.0",
   "description": "Generate premium, context-aware comments for LinkedIn posts using Groq API.",
   "permissions": [
     "storage",
-    "activeTab"
+    "activeTab",
+    "identity"
   ],
   "host_permissions": [
     "https://*.linkedin.com/*",
-    "https://api.groq.com/*"
+    "https://api.groq.com/*",
+    "https://*.firebaseapp.com/*"
   ],
+  "oauth2": {
+    "client_id": "523401799544-94cgm4rc47ejg5u03m9cttch1g44c330.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
   "background": {
     "service_worker": "background.js"
   },
@@ -36,8 +45,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["content/content.css"],
-      "matches": ["https://*.linkedin.com/*"]
+      "resources": ["content/content.css", ".env"],
+      "matches": ["<all_urls>"]
     }
   ]
 }
