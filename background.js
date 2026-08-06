@@ -1,4 +1,5 @@
-// Background service worker for LinkedIn AI Comment Generator
+// Background service worker for Eloquix Chrome Extension
+importScripts("config.js", "firebase-db.js");
 
 // In-memory cache for generated comments: key is post text hash/identifier, value is comment
 const commentCache = new Map();
@@ -6,19 +7,49 @@ const commentCache = new Map();
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   if (request.action === "generateComment") {
     handleCommentGeneration(request)
-      .then(comment => sendResponse({ success: true, comment }))
+      .then(res => sendResponse({ success: true, comment: res.comment, usage: res.usage }))
       .catch(error => sendResponse({ success: false, error: error.message || String(error) }));
     return true; // Keep message channel open for asynchronous response
   }
 });
 
 async function handleCommentGeneration({ postText, tone, customInstructions, regenerate }) {
-  // Try to load Groq API key from storage
-  const storage = await chrome.storage.local.get(["groqApiKey", "defaultModel"]);
+  // 1. Try to load Groq API key and user auth from storage
+  const storage = await chrome.storage.local.get(["groqApiKey", "defaultModel", "userAuth"]);
   const apiKey = storage.groqApiKey;
   
   if (!apiKey) {
     throw new Error("Groq API Key is not configured. Please open the extension settings to set your API Key.");
+  }
+
+  // 2. Enforce Firebase authentication & Daily Quota check (or fallback to local storage for guests)
+  const userAuth = storage.userAuth;
+  let usage = null;
+  
+  if (userAuth && userAuth.uid && userAuth.idToken) {
+    try {
+      usage = await verifyAndIncrementQuota(userAuth.uid, userAuth.idToken);
+    } catch (quotaErr) {
+      throw new Error(quotaErr.message || "Daily limit reached.");
+    }
+  } else {
+    // Local usage quota fallback for unregistered/guest users
+    const today = new Date().toISOString().split("T")[0];
+    const localStorageData = await chrome.storage.local.get(["guestUsage"]);
+    let guestUsage = localStorageData.guestUsage || { date: today, count: 0 };
+    
+    if (guestUsage.date !== today) {
+      guestUsage = { date: today, count: 0 };
+    }
+    
+    const limit = PLAN_LIMITS.free; // 2 per day
+    if (guestUsage.count >= limit) {
+      throw new Error(`Daily limit reached (${guestUsage.count}/${limit} generated today). Upgrade your plan to get more AI comments!`);
+    }
+    
+    guestUsage.count += 1;
+    await chrome.storage.local.set({ guestUsage });
+    usage = { used: guestUsage.count, limit: limit, plan: "free" };
   }
 
   const model = storage.defaultModel || "llama-3.1-8b-instant";
@@ -122,7 +153,7 @@ ${sanitizedCustomInstructions ? `\nAdditional Context/Instructions for the Comme
 
     // Save in cache
     commentCache.set(cacheKey, comment);
-    return comment;
+    return { comment, usage };
   } catch (error) {
     console.error("Groq API error:", error);
     throw error;
