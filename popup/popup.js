@@ -1,6 +1,10 @@
 document.addEventListener("DOMContentLoaded", async () => {
+  // Ensure .env variables are loaded asynchronously before reading PAYMENT_LINKS
+  if (typeof loadEnvVariables === "function") {
+    await loadEnvVariables();
+  }
+
   const apiKeyInput = document.getElementById("apiKey");
-  const modelSelect = document.getElementById("modelSelect");
   const toneSelect = document.getElementById("toneSelect");
   const customInstructionsInput = document.getElementById("customInstructions");
   const settingsForm = document.getElementById("settingsForm");
@@ -19,17 +23,23 @@ document.addEventListener("DOMContentLoaded", async () => {
   const googleLoginBtn = document.getElementById("googleLoginBtn");
   const logoutBtn = document.getElementById("logoutBtn");
 
+  // Dynamically evaluate PAYMENT_LINKS from .env
+  const inrPro = PAYMENT_LINKS.inr.pro || "https://rzp.io/rzp/hcA5ffEW";
+  const inrUltra = PAYMENT_LINKS.inr.ultra || "https://rzp.io/rzp/9gxUjX5";
+  const usdPro = PAYMENT_LINKS.usd.pro || "https://rzp.io/rzp/twQPHug";
+  const usdUltra = PAYMENT_LINKS.usd.ultra || "https://rzp.io/rzp/7d2rZJB";
+
   // Configure upgrade button links & labels based on currency (INR vs USD)
   const isIndia = isIndiaUser();
   if (isIndia) {
-    proBtn.href = PAYMENT_LINKS.inr.pro;
+    proBtn.href = inrPro;
     proBtn.textContent = "⚡ Upgrade Pro (₹99/mo)";
-    ultraBtn.href = PAYMENT_LINKS.inr.ultra;
+    ultraBtn.href = inrUltra;
     ultraBtn.textContent = "🚀 Upgrade Ultra (₹149/mo)";
   } else {
-    proBtn.href = PAYMENT_LINKS.usd.pro;
+    proBtn.href = usdPro;
     proBtn.textContent = "⚡ Upgrade Pro ($4.99/mo)";
-    ultraBtn.href = PAYMENT_LINKS.usd.ultra;
+    ultraBtn.href = usdUltra;
     ultraBtn.textContent = "🚀 Upgrade Ultra ($7.99/mo)";
   }
 
@@ -50,9 +60,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       updateStatus(false);
     }
 
-    if (preferences.defaultModel) {
-      modelSelect.value = preferences.defaultModel;
-    }
     if (preferences.defaultTone) {
       toneSelect.value = preferences.defaultTone;
     }
@@ -117,14 +124,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     e.preventDefault();
     
     const apiKey = apiKeyInput.value.trim();
-    const model = modelSelect.value;
     const tone = toneSelect.value;
     const customInstructions = customInstructionsInput.value.trim();
 
     try {
       await chrome.storage.local.set({
         groqApiKey: apiKey,
-        defaultModel: model,
         defaultTone: tone,
         customInstructions: customInstructions
       });
