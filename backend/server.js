@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
+const mongoose = require("mongoose");
 
 // Load environment variables from .env file
 dotenv.config();
@@ -25,16 +26,47 @@ const PLAN_LIMITS = {
 // In-Memory Comment Cache to save Groq API tokens & speed up repeat requests
 const commentCache = new Map();
 
-// Local Database File Path (Fallback storage if Firestore is unconfigured)
+// ----------------------------------------------------
+// MONGODB CLOUD DATABASE INTEGRATION
+// ----------------------------------------------------
+const userSchema = new mongoose.Schema({
+  uid: { type: String, required: true, unique: true, index: true },
+  email: { type: String, default: "" },
+  plan: { type: String, default: "free", enum: ["free", "pro", "ultra"] },
+  status: { type: String, default: "active" },
+  lastResetDate: { type: String, required: true },
+  commentsGeneratedToday: { type: Number, default: 0 },
+  dailyLimit: { type: Number, default: 2 },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+let isMongoConnected = false;
+const mongoUri = process.env.MONGODB_URI;
+
+if (mongoUri) {
+  mongoose
+    .connect(mongoUri)
+    .then(() => {
+      isMongoConnected = true;
+      console.log("🍃 MongoDB Cloud Database Connected Successfully!");
+    })
+    .catch((err) => {
+      console.error("⚠️ MongoDB Connection Error (Using local JSON fallback):", err.message);
+    });
+}
+
+// ----------------------------------------------------
+// LOCAL DISK JSON FALLBACK DB HELPERS
+// ----------------------------------------------------
 const DATA_DIR = path.join(__dirname, "data");
 const DB_FILE = path.join(DATA_DIR, "users.json");
 
-// Ensure data directory exists
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-// Simple Local DB Helpers
 function loadLocalUsers() {
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -59,11 +91,47 @@ function getTodayString() {
   return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 }
 
-// User Record Management
+// ----------------------------------------------------
+// UNIFIED USER DB DATA ACCESS LAYER
+// ----------------------------------------------------
 async function getUserRecord(userId, email = "") {
-  const users = loadLocalUsers();
   const today = getTodayString();
 
+  // 1. Try MongoDB Cloud Database first
+  if (isMongoConnected) {
+    try {
+      let user = await User.findOne({ uid: userId });
+      if (!user) {
+        user = await User.create({
+          uid: userId,
+          email: email,
+          plan: "free",
+          status: "active",
+          lastResetDate: today,
+          commentsGeneratedToday: 0,
+          dailyLimit: PLAN_LIMITS.free
+        });
+      } else if (email && !user.email) {
+        user.email = email;
+        await user.save();
+      }
+
+      // Auto-reset daily quota if new day
+      if (user.lastResetDate !== today) {
+        user.commentsGeneratedToday = 0;
+        user.lastResetDate = today;
+        await user.save();
+      }
+
+      user.dailyLimit = PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
+      return user.toObject();
+    } catch (err) {
+      console.error("MongoDB getUserRecord error, falling back to JSON:", err.message);
+    }
+  }
+
+  // 2. Fallback to Local JSON DB File
+  const users = loadLocalUsers();
   if (!users[userId]) {
     users[userId] = {
       uid: userId,
@@ -79,24 +147,54 @@ async function getUserRecord(userId, email = "") {
   }
 
   const user = users[userId];
-
-  // Auto-reset daily quota if new day
   if (user.lastResetDate !== today) {
     user.commentsGeneratedToday = 0;
     user.lastResetDate = today;
     saveLocalUsers(users);
   }
 
-  // Ensure dailyLimit matches current plan if omitted
   user.dailyLimit = PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
-
   return user;
 }
 
 async function incrementUserQuota(userId) {
-  const users = loadLocalUsers();
   const today = getTodayString();
 
+  // 1. Try MongoDB Cloud Database first
+  if (isMongoConnected) {
+    try {
+      let user = await User.findOne({ uid: userId });
+      if (!user) {
+        user = await User.create({
+          uid: userId,
+          plan: "free",
+          status: "active",
+          lastResetDate: today,
+          commentsGeneratedToday: 0,
+          dailyLimit: PLAN_LIMITS.free
+        });
+      }
+
+      if (user.lastResetDate !== today) {
+        user.commentsGeneratedToday = 0;
+        user.lastResetDate = today;
+      }
+
+      user.commentsGeneratedToday += 1;
+      await user.save();
+
+      return {
+        used: user.commentsGeneratedToday,
+        limit: user.dailyLimit || PLAN_LIMITS[user.plan] || PLAN_LIMITS.free,
+        plan: user.plan
+      };
+    } catch (err) {
+      console.error("MongoDB incrementUserQuota error:", err.message);
+    }
+  }
+
+  // 2. Fallback to Local JSON DB File
+  const users = loadLocalUsers();
   if (!users[userId]) {
     await getUserRecord(userId);
     return incrementUserQuota(userId);
@@ -119,13 +217,30 @@ async function incrementUserQuota(userId) {
 }
 
 async function updateUserPlan(userId, newPlan) {
+  const limit = PLAN_LIMITS[newPlan] || PLAN_LIMITS.free;
+
+  // 1. Try MongoDB Cloud Database first
+  if (isMongoConnected) {
+    try {
+      const user = await User.findOneAndUpdate(
+        { uid: userId },
+        { plan: newPlan, dailyLimit: limit },
+        { new: true, upsert: true }
+      );
+      return user.toObject();
+    } catch (err) {
+      console.error("MongoDB updateUserPlan error:", err.message);
+    }
+  }
+
+  // 2. Fallback to Local JSON DB File
   const users = loadLocalUsers();
   if (!users[userId]) {
     await getUserRecord(userId);
   }
   const user = users[userId];
   user.plan = newPlan;
-  user.dailyLimit = PLAN_LIMITS[newPlan] || PLAN_LIMITS.free;
+  user.dailyLimit = limit;
   saveLocalUsers(users);
   return user;
 }
@@ -146,13 +261,14 @@ function hashString(str) {
 // API ROUTES
 // ----------------------------------------------------
 
-// 1. Health Check
+// 1. Health Check Route
 const healthHandler = (req, res) => {
   res.json({
     status: "ok",
     service: "Eloquix LinkedIn AI Comment Backend API",
     timestamp: new Date().toISOString(),
-    hasGroqKey: !!process.env.GROQ_API_KEY
+    hasGroqKey: !!process.env.GROQ_API_KEY,
+    database: isMongoConnected ? "MongoDB Atlas Cloud" : "Local JSON Storage"
   });
 };
 
@@ -428,5 +544,6 @@ app.listen(PORT, () => {
   console.log("--------------------------------------------------");
   console.log(`🚀 Eloquix Backend API running on http://localhost:${PORT}`);
   console.log(`🔑 Groq API Status: ${process.env.GROQ_API_KEY ? "Configured" : "MISSING (Set in backend/.env)"}`);
+  console.log(`🍃 Database Status: ${mongoUri ? "Connecting to MongoDB Cloud..." : "Local JSON Storage"}`);
   console.log("--------------------------------------------------");
 });
