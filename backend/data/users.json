@@ -8,5 +8,15 @@
     "commentsGeneratedToday": 2,
     "dailyLimit": 2,
     "createdAt": "2026-08-16T15:14:15.120Z"
+  },
+  "104715836920069981130": {
+    "uid": "104715836920069981130",
+    "email": "yuvraj17mishra11@gmail.com",
+    "plan": "free",
+    "status": "active",
+    "lastResetDate": "2026-08-16",
+    "commentsGeneratedToday": 0,
+    "dailyLimit": 2,
+    "createdAt": "2026-08-16T16:16:49.185Z"
   }
 }

@@ -15,8 +15,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
 async function handleCommentGeneration({ postText, tone, customInstructions, regenerate }) {
   // 1. Get backend URL & user authentication from storage
-  const storage = await chrome.storage.local.get(["backendUrl", "userAuth"]);
-  const backendUrl = storage.backendUrl || BACKEND_URL || "http://localhost:5000";
+  const storage = await chrome.storage.local.get(["userAuth"]);
+  const backendUrl = BACKEND_URL || "http://localhost:5000";
   const userAuth = storage.userAuth || {};
   const uid = userAuth.uid || "guest_user";
 

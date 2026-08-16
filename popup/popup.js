@@ -1,7 +1,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
   const toneSelect = document.getElementById("toneSelect");
   const customInstructionsInput = document.getElementById("customInstructions");
-  const backendUrlInput = document.getElementById("backendUrlInput");
   const settingsForm = document.getElementById("settingsForm");
   const saveBtn = document.getElementById("saveBtn");
   const statusBadge = document.getElementById("statusBadge");
@@ -19,14 +18,12 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load preferences from storage
   const preferences = await chrome.storage.local.get([
-    "backendUrl",
     "defaultTone",
     "customInstructions",
     "userAuth"
   ]);
 
-  const activeBackendUrl = preferences.backendUrl || BACKEND_URL || "http://localhost:5000";
-  if (backendUrlInput) backendUrlInput.value = activeBackendUrl;
+  const activeBackendUrl = BACKEND_URL || "http://localhost:5000";
   if (preferences.defaultTone && toneSelect) toneSelect.value = preferences.defaultTone;
   if (preferences.customInstructions && customInstructionsInput) customInstructionsInput.value = preferences.customInstructions;
 
@@ -124,16 +121,14 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const tone = toneSelect ? toneSelect.value : "insightful";
     const customInstructions = customInstructionsInput ? customInstructionsInput.value.trim() : "";
-    const backendUrl = backendUrlInput ? backendUrlInput.value.trim() : BACKEND_URL;
 
     try {
       await chrome.storage.local.set({
-        backendUrl: backendUrl,
         defaultTone: tone,
         customInstructions: customInstructions
       });
 
-      checkBackendHealth(backendUrl);
+      checkBackendHealth(BACKEND_URL);
 
       // Save animation feedback
       const originalText = saveBtn.querySelector("span").textContent;
