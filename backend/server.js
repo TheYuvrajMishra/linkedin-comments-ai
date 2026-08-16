@@ -147,14 +147,18 @@ function hashString(str) {
 // ----------------------------------------------------
 
 // 1. Health Check
-app.get("/api/v1/health", (req, res) => {
+const healthHandler = (req, res) => {
   res.json({
     status: "ok",
     service: "Eloquix LinkedIn AI Comment Backend API",
     timestamp: new Date().toISOString(),
     hasGroqKey: !!process.env.GROQ_API_KEY
   });
-});
+};
+
+app.get("/health", healthHandler);
+app.get("/api/v1/health", healthHandler);
+app.get("/", healthHandler);
 
 // 2. Auth Verification & User Profile Retrieval
 app.post("/api/v1/auth/verify", async (req, res) => {
