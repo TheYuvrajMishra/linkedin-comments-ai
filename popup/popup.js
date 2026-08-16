@@ -158,7 +158,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
 
         const redirectUri = chrome.identity.getRedirectURL();
-        const cid = "523401799544-94cgm4rc47ejg5u03m9cttch1g44c330.apps.googleusercontent.com";
+        const manifest = chrome.runtime.getManifest();
+        const cid = manifest?.oauth2?.client_id || "";
         const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
           `client_id=${encodeURIComponent(cid)}&` +
           `response_type=token&` +

@@ -363,8 +363,8 @@ app.post("/api/v1/payments/create-checkout", (req, res) => {
   let checkoutUrl = "";
   if (isINR) {
     checkoutUrl = plan === "ultra"
-      ? (process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/9gxUjX5")
-      : (process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/hcA5ffEW");
+      ? (process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/Oyz6stR")
+      : (process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/YJ677Vl");
   } else {
     checkoutUrl = plan === "ultra"
       ? (process.env.RAZORPAY_ULTRA_LINK_USD || "https://rzp.io/rzp/7d2rZJB")
