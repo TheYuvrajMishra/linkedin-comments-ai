@@ -226,8 +226,6 @@ function isContextValid() {
       cleanup();
       return false;
     }
-    // Accessing getManifest will throw an error if the context is invalidated
-    chrome.runtime.getManifest();
     return true;
   } catch (e) {
     cleanup();
@@ -235,7 +233,7 @@ function isContextValid() {
   }
 }
 
-// Clean up listeners if the extension was reloaded or disabled
+// Clean up listeners and injected UI elements if the extension was reloaded or disabled
 function cleanup() {
   if (globalObserver) {
     try {
@@ -252,7 +250,10 @@ function cleanup() {
   try {
     closeActiveDropdownPortal();
   } catch (e) {}
-  console.log("LinkAI: Extension context was invalidated. Cleaned up observers.");
+  try {
+    document.querySelectorAll(".linkai-container").forEach(el => el.remove());
+  } catch (e) {}
+  console.log("LinkAI: Extension context was invalidated. Cleaned up observers & DOM.");
 }
 
 let activeDropdownPortal = null;
@@ -522,12 +523,16 @@ function injectAIElements(editor) {
   let hasGenerated = false;
 
   // Retrieve last selected tone from storage
-  chrome.storage.local.get("defaultTone", (data) => {
-    if (data.defaultTone) {
-      currentTone = data.defaultTone;
-      updateToneUI();
-    }
-  });
+  if (isContextValid()) {
+    try {
+      chrome.storage.local.get("defaultTone", (data) => {
+        if (data && data.defaultTone) {
+          currentTone = data.defaultTone;
+          updateToneUI();
+        }
+      });
+    } catch (e) {}
+  }
 
   function updateToneUI() {
     const activeTone = TONES.find(t => t.id === currentTone) || TONES[0];
@@ -548,7 +553,11 @@ function injectAIElements(editor) {
     
     showToneDropdownPortal(toneTrigger, currentTone, (selectedToneId) => {
       currentTone = selectedToneId;
-      chrome.storage.local.set({ defaultTone: selectedToneId });
+      if (isContextValid()) {
+        try {
+          chrome.storage.local.set({ defaultTone: selectedToneId });
+        } catch (e) {}
+      }
       updateToneUI();
       // Reset generated state if tone changes to let them do a fresh standard generate (cached if exists)
       hasGenerated = false;
@@ -593,50 +602,68 @@ function injectAIElements(editor) {
     isGenerating = true;
     updateButtonUI();
 
-    // Fetch custom instructions if any
-    chrome.storage.local.get("customInstructions", (data) => {
-      const customInstructions = data.customInstructions || "";
+    // Fetch custom instructions if any & send message safely
+    try {
+      if (!isContextValid()) {
+        isGenerating = false;
+        updateButtonUI();
+        showStatus("Extension reloaded. Please refresh page.", "error");
+        return;
+      }
 
-      console.log("LinkAI: Sending generation request:", {
-        postText: postText,
-        tone: currentTone,
-        customInstructions: customInstructions,
-        regenerate: hasGenerated
-      });
+      chrome.storage.local.get("customInstructions", (data) => {
+        const customInstructions = (data && data.customInstructions) || "";
 
-      // Send generation request to background script
-      chrome.runtime.sendMessage(
-        {
-          action: "generateComment",
+        console.log("LinkAI: Sending generation request:", {
           postText: postText,
           tone: currentTone,
           customInstructions: customInstructions,
           regenerate: hasGenerated
-        },
-        (response) => {
+        });
+
+        if (!isContextValid()) {
           isGenerating = false;
-
-          if (chrome.runtime.lastError) {
-            console.error("Message delivery failed:", chrome.runtime.lastError);
-            updateButtonUI();
-            showStatus("Connection error.", "error");
-            return;
-          }
-
-          if (response && response.success) {
-            hasGenerated = true;
-            updateButtonUI();
-            autofillDraftJSEditor(editor, response.comment);
-            showStatus("Completed", "success");
-            setTimeout(() => showStatus("", ""), 3000);
-          } else {
-            updateButtonUI();
-            const errorMsg = response?.error || "Generation failed.";
-            showStatus(errorMsg, "error");
-          }
+          updateButtonUI();
+          showStatus("Extension reloaded. Please refresh page.", "error");
+          return;
         }
-      );
-    });
+
+        // Send generation request to background script
+        chrome.runtime.sendMessage(
+          {
+            action: "generateComment",
+            postText: postText,
+            tone: currentTone,
+            customInstructions: customInstructions,
+            regenerate: hasGenerated
+          },
+          (response) => {
+            isGenerating = false;
+
+            if (chrome.runtime.lastError) {
+              console.error("Message delivery failed:", chrome.runtime.lastError);
+              updateButtonUI();
+              showStatus("Connection error.", "error");
+              return;
+            }
+
+            if (response && response.success) {
+              hasGenerated = true;
+              updateButtonUI();
+              autofillDraftJSEditor(editor, response.comment);
+              showStatus("Completed", "success");
+            } else {
+              updateButtonUI();
+              showStatus(response?.error || "Generation failed.", "error");
+            }
+          }
+        );
+      });
+    } catch (err) {
+      isGenerating = false;
+      updateButtonUI();
+      showStatus("Context error. Please refresh page.", "error");
+    }
   });
 
   // UI state change helpers

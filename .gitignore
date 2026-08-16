@@ -6,3 +6,4 @@
 # Operating System Files
 .DS_Store
 Thumbs.db
+/backend/node_modules

@@ -30,10 +30,10 @@
           <p>Comment Companion</p>
         </div>
       </div>
-      <div class="status-badge" id="statusBadge">Active</div>
+      <div class="status-badge" id="statusBadge">Checking...</div>
     </header>
 
-    <!-- Account & Subscription Minimal Card -->
+    <!-- Account & Subscription Card -->
     <div class="account-card" id="accountCard">
       <div class="account-header">
         <div class="user-profile">
@@ -67,40 +67,23 @@
 
       <!-- Upgrade Buttons -->
       <div class="upgrade-action-row" id="upgradeRow">
-        <a href="https://rzp.io/rzp/hcA5ffEW" target="_blank" class="upgrade-btn pro-btn" id="proBtn">
-          ⚡ Pro (₹99/mo)
+        <a href="https://rzp.io/rzp/YJ677Vl" target="_blank" class="upgrade-btn pro-btn" id="proBtn">
+          ⚡ Upgrade Pro (₹49/mo)
         </a>
-        <a href="https://rzp.io/rzp/9gxUjX5" target="_blank" class="upgrade-btn ultra-btn" id="ultraBtn">
-          🚀 Ultra (₹149/mo)
+        <a href="https://rzp.io/rzp/Oyz6stR" target="_blank" class="upgrade-btn ultra-btn" id="ultraBtn">
+          🚀 Upgrade Ultra (₹99/mo)
         </a>
       </div>
     </div>
 
-    <!-- Main Settings Form Container (Double-Bezel Minimal Enclosure) -->
+    <!-- Main Settings Form Container -->
     <div class="double-bezel-outer">
       <main class="app-main">
         <form id="settingsForm">
           
-          <!-- API Key Field -->
+          <!-- Default Tone Selection -->
           <div class="form-group">
-            <div class="label-row">
-              <label for="apiKey">Groq API Key</label>
-              <a href="https://console.groq.com/keys" target="_blank" class="helper-link">Get Key <span class="arrow">↗</span></a>
-            </div>
-            <div class="input-wrapper">
-              <input type="password" id="apiKey" placeholder="gsk_..." required autocomplete="off">
-              <button type="button" class="toggle-password" id="togglePasswordBtn" aria-label="Show API Key">
-                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                  <circle cx="12" cy="12" r="3"/>
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          <!-- Default Tone Selection Only -->
-          <div class="form-group">
-            <label for="toneSelect">Default Tone</label>
+            <label for="toneSelect">Default Comment Tone</label>
             <div class="select-wrapper">
               <select id="toneSelect">
                 <option value="insightful" selected>Insightful 💡</option>
@@ -112,10 +95,18 @@
             </div>
           </div>
 
-          <!-- Custom Context / Instructions -->
+          <!-- Custom Context / Writing Style -->
           <div class="form-group">
-            <label for="customInstructions">Your Context / Writing Style</label>
-            <textarea id="customInstructions" rows="2" placeholder="e.g. 'Senior Engineer. Focus on UX, performance, and clean code.'"></textarea>
+            <label for="customInstructions">Your Persona & Writing Style</label>
+            <textarea id="customInstructions" rows="3" placeholder="e.g. 'Software Engineer. Focus on performance, security, and developer productivity.'"></textarea>
+          </div>
+
+          <!-- Backend Server URL Config (Advanced) -->
+          <div class="form-group">
+            <label for="backendUrlInput">Backend Server URL</label>
+            <div class="input-wrapper">
+              <input type="text" id="backendUrlInput" value="http://localhost:5000" placeholder="http://localhost:5000">
+            </div>
           </div>
 
           <!-- Save Button -->
@@ -129,10 +120,9 @@
 
     <!-- Footer -->
     <footer class="app-footer">
-      <p>Keys stored locally. Secure checkout via Razorpay.</p>
+      <p>Securely powered by Eloquix API Server.</p>
     </footer>
   </div>
-  <script src="../env-loader.js"></script>
   <script src="../config.js"></script>
   <script src="../firebase-db.js"></script>
   <script src="popup.js"></script>
