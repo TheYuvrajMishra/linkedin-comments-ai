@@ -11,9 +11,18 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://linkedin-comments-ai.vercel.app";
 
-// Middleware
-app.use(cors({ origin: "*" })); // Allow Chrome Extension cross-origin requests
+// Middleware - Configure CORS to support Chrome Extensions & Vercel Web App
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow all extension requests, requests with no origin, local dev, or FRONTEND_URL
+    if (!origin || origin.startsWith("chrome-extension://") || origin === FRONTEND_URL || origin === "http://localhost:5173" || origin === "https://linkedin-comments-ai.vercel.app") {
+      return callback(null, true);
+    }
+    return callback(null, true); // Permissive CORS for extension & multi-domain support
+  }
+}));
 app.use(express.json({ limit: "2mb" }));
 
 // Constants & Tier Limits
