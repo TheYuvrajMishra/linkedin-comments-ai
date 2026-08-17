@@ -12,17 +12,6 @@ import {
 
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
-const PAYMENT_LINKS = {
-  inr: {
-    pro: process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/8fyIuiTV",
-    ultra: process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/AKMnRQ9h"
-  },
-  usd: {
-    pro: process.env.RAZORPAY_PRO_LINK_USD || "https://rzp.io/rzp/lwkO8dn8",
-    ultra: process.env.RAZORPAY_ULTRA_LINK_USD || "https://rzp.io/rzp/5SoMpUI"
-  }
-};
-
 function GridSection({ children, className = "", id }) {
   return (
     <div id={id} className={`relative w-full border-b border-white/10 ${className}`}>
@@ -142,7 +131,7 @@ export default function ExtensionPage() {
     }
   };
 
-  const handleSubscriptionClick = (plan) => {
+  const handleSubscriptionClick = async (plan) => {
     if (!user) {
       setGateNotice('Subscription purchase requires Google authentication. Please sign in above to continue.');
       const authSection = document.getElementById('auth-section');
@@ -152,9 +141,21 @@ export default function ExtensionPage() {
       return;
     }
 
-    const link = PAYMENT_LINKS[currency][plan];
-    if (link) {
-      window.open(link, '_blank');
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/v1/payments/create-checkout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ plan, currency: currency.toUpperCase() })
+      });
+      const data = await res.json();
+      if (data.success && data.checkoutUrl) {
+        window.open(data.checkoutUrl, '_blank');
+      } else {
+        alert('Could not retrieve payment checkout URL. Please try again.');
+      }
+    } catch (e) {
+      console.error('Error fetching checkout URL from backend:', e);
+      alert('Unable to connect to payment gateway server.');
     }
   };
 
