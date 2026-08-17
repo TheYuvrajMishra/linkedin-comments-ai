@@ -13,8 +13,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   const proBtn = document.getElementById("proBtn");
   const ultraBtn = document.getElementById("ultraBtn");
 
-  const googleLoginBtn = document.getElementById("googleLoginBtn");
+  const webAuthBtn = document.getElementById("webAuthBtn");
+  const webAuthBtnText = document.getElementById("webAuthBtnText");
   const logoutBtn = document.getElementById("logoutBtn");
+
+  const activeWebsiteUrl = (typeof WEBSITE_URL !== "undefined" ? WEBSITE_URL : "http://localhost:5173");
+  const activeBackendUrl = (typeof BACKEND_URL !== "undefined" ? BACKEND_URL : "http://localhost:5000");
 
   // Load preferences from storage
   const preferences = await chrome.storage.local.get([
@@ -23,7 +27,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     "userAuth"
   ]);
 
-  const activeBackendUrl = BACKEND_URL || "http://localhost:5000";
   if (preferences.defaultTone && toneSelect) toneSelect.value = preferences.defaultTone;
   if (preferences.customInstructions && customInstructionsInput) customInstructionsInput.value = preferences.customInstructions;
 
@@ -54,9 +57,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Load User Account Quota info from Backend API Server
   const userAuth = preferences.userAuth;
-  if (userAuth && userAuth.uid) {
-    userEmail.textContent = userAuth.email || "Authenticated User";
-    if (googleLoginBtn) googleLoginBtn.style.display = "none";
+  if (userAuth && userAuth.uid && userAuth.email) {
+    userEmail.textContent = userAuth.email;
+    if (webAuthBtnText) webAuthBtnText.textContent = "Manage Account on Website";
     if (logoutBtn) logoutBtn.style.display = "inline-block";
 
     try {
@@ -66,9 +69,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       console.warn("Could not fetch user profile from backend:", e);
     }
   } else {
-    userEmail.textContent = "Guest User";
+    userEmail.textContent = "Not Authenticated";
     planPill.textContent = "FREE PLAN";
-    if (googleLoginBtn) googleLoginBtn.style.display = "flex";
+    if (webAuthBtnText) webAuthBtnText.textContent = "Log In on Companion Site";
     if (logoutBtn) logoutBtn.style.display = "none";
 
     try {
@@ -115,6 +118,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
+  // Open Companion Auth Center Website
+  if (webAuthBtn) {
+    webAuthBtn.addEventListener("click", () => {
+      chrome.tabs.create({ url: activeWebsiteUrl });
+    });
+  }
+
   // Save Preferences Listener
   settingsForm.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -148,70 +158,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // Google Auth Button Handler
-  if (googleLoginBtn) {
-    googleLoginBtn.addEventListener("click", () => {
-      chrome.identity.getAuthToken({ interactive: true }, async (token) => {
-        if (!chrome.runtime.lastError && token) {
-          await processGoogleUser(token);
-          return;
-        }
-
-        const redirectUri = chrome.identity.getRedirectURL();
-        const manifest = chrome.runtime.getManifest();
-        const cid = manifest?.oauth2?.client_id || "";
-        const authUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-          `client_id=${encodeURIComponent(cid)}&` +
-          `response_type=token&` +
-          `redirect_uri=${encodeURIComponent(redirectUri)}&` +
-          `scope=${encodeURIComponent("https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile")}`;
-
-        chrome.identity.launchWebAuthFlow(
-          { url: authUrl, interactive: true },
-          async (redirectUrl) => {
-            if (chrome.runtime.lastError || !redirectUrl) {
-              alert("Sign-in failed: " + (chrome.runtime.lastError ? chrome.runtime.lastError.message : "Cancelled"));
-              return;
-            }
-
-            try {
-              const urlObj = new URL(redirectUrl);
-              const hashParams = new URLSearchParams(urlObj.hash.substring(1));
-              const accessToken = hashParams.get("access_token");
-
-              if (!accessToken) throw new Error("No access token returned.");
-              await processGoogleUser(accessToken);
-            } catch (err) {
-              console.error("Failed to authenticate user:", err);
-              alert("Could not process Google Sign-In data.");
-            }
-          }
-        );
-      });
-    });
-  }
-
-  async function processGoogleUser(token) {
-    try {
-      const res = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      const googleUser = await res.json();
-
-      const userAuth = {
-        uid: googleUser.id,
-        email: googleUser.email,
-        idToken: token
-      };
-
-      await verifyAndRegisterUser(userAuth);
-      await chrome.storage.local.set({ userAuth });
-      window.location.reload();
-    } catch (err) {
-      console.error("Failed to authenticate user with backend:", err);
-    }
-  }
-
+  // Sign out handler
   if (logoutBtn) {
     logoutBtn.addEventListener("click", async () => {
       await chrome.storage.local.remove("userAuth");

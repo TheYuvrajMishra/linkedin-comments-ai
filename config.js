@@ -1,7 +1,8 @@
 // Frontend Configuration for Eloquix Chrome Extension
-// Communicates with backend API server
+// Communicates with backend API server and companion auth website
 
 const BACKEND_URL = "http://localhost:5000";
+const WEBSITE_URL = "http://localhost:5173";
 
 // Fallback Payment Links if backend is unreachable
 const PAYMENT_LINKS = {
