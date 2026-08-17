@@ -9,22 +9,26 @@ import {
   onAuthStateChanged
 } from 'firebase/auth';
 
-const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
-  authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-  appId: process.env.FIREBASE_APP_ID,
-  measurementId: process.env.FIREBASE_MEASUREMENT_ID
+const getEnvVar = (key, fallback) => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    if (import.meta.env[`VITE_${key}`]) return import.meta.env[`VITE_${key}`];
+    if (import.meta.env[key]) return import.meta.env[key];
+  }
+  if (typeof process !== 'undefined' && process.env && process.env[key]) {
+    return process.env[key];
+  }
+  return fallback;
 };
 
-const requiredKeys = ['apiKey', 'authDomain', 'projectId', 'storageBucket', 'messagingSenderId', 'appId'];
-const missingKeys = requiredKeys.filter(key => !firebaseConfig[key]);
-
-if (missingKeys.length > 0) {
-  throw new Error(`Missing required Firebase config keys: ${missingKeys.join(', ')}`);
-}
+const firebaseConfig = {
+  apiKey: getEnvVar('FIREBASE_API_KEY', 'AIzaSyBuaI7XcvOxdUmwX8Xawz1vb1GGKDr-TVI'),
+  authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN', 'eloquix-609b8.firebaseapp.com'),
+  projectId: getEnvVar('FIREBASE_PROJECT_ID', 'eloquix-609b8'),
+  storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET', 'eloquix-609b8.firebasestorage.app'),
+  messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID', '427738230416'),
+  appId: getEnvVar('FIREBASE_APP_ID', '1:427738230416:web:ab265d08ba3827d583f215'),
+  measurementId: getEnvVar('FIREBASE_MEASUREMENT_ID', 'G-8F86HP7G2Y')
+};
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

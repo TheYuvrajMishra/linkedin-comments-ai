@@ -10,7 +10,7 @@ import {
   onAuthStateChanged
 } from '../firebase';
 
-const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
+const BACKEND_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL) || process.env.BACKEND_URL || "http://localhost:5000";
 
 function GridSection({ children, className = "", id }) {
   return (
