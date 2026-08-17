@@ -1,43 +1,49 @@
-# LinkAI: LinkedIn AI Comment Generator Chrome Extension & Backend API
+# Eloquix (LinkAI): LinkedIn AI Comment Generator & Web Portal
 
-LinkAI (Eloquix) is a premium, security-focused Chrome Extension (Manifest V3) and Node.js Backend API Server that generates intelligent, context-aware comments for LinkedIn posts directly inside the LinkedIn interface using the Groq API.
-
----
-
-## 🏗️ Client-Server Architecture
-
-All sensitive operations—such as Groq API key storage, AI prompt processing, user authentication, daily quota enforcement, and payment webhook verification—are handled exclusively by a dedicated **Backend API Server**.
-
-```
-Chrome Extension Frontend              Backend Server (Port 5000)                      External Services
-┌───────────────────────┐            ┌─────────────────────────────────────────┐       ┌────────────────┐
-│  Content Script /     │            │  • Auth Verification (Google / Firebase)│       │  Groq API      │
-│  Background Worker    │ ─────────► │  • Quota Check & Atomic Usage Counter  │ ────► │  (Server Key)  │
-│  (UI Overlay Only)    │  REST API  │  • System Prompt & Injection Defense    │       └────────────────┘
-└───────────────────────┘            │  • Webhook Verification (Razorpay)     │       ┌────────────────┐
-                                     └─────────────────────────────────────────┘ ────► │  Firestore / DB│
-                                                                                       └────────────────┘
-```
+Eloquix is a premium, security-focused Chrome Extension (Manifest V3), modern Vite React Web Application, and Node.js Backend API Server that generates sharp, context-aware AI comments for LinkedIn posts directly inside the LinkedIn interface using Groq LLM acceleration.
 
 ---
 
-## ✨ Key Features
+## 🏗️ Architecture Overview
 
-- **Backend-Secured Groq Generation:** API keys are stored in `backend/.env` and never exposed to client browsers or extensions.
-- **Native In-Context Overlay:** Seamlessly injects a custom UI overlay (with a **✨ Generate AI** button, **Tone Selector**, and **Regenerate / Copy** controls) right into LinkedIn comment forms.
-- **5 Curated Tones:** Choose the exact tone for your response:
+Eloquix uses a decoupled, three-tier architecture ensuring zero client-side API key exposure, multi-device session sync, and strict server-side abuse prevention.
+
+```
+┌─────────────────────────┐          ┌─────────────────────────┐          ┌─────────────────────────┐
+│ Chrome Extension        │          │ Modern Vite Web Portal  │          │ Node.js Backend API     │
+│ • DOM Comment Inserter  │ ───────► │ • Session & Auth Hub    │ ───────► │ • Groq API Proxy        │
+│ • LinkedIn ID Capture   │          │ • Double-Bezel Pricing   │          │ • MongoDB Atlas Cloud   │
+│ • Web Portal Bridge     │          │ • Auto Currency Detect  │          │ • Multi-Account Abuse   │
+└─────────────────────────┘          └─────────────────────────┘          │   Deduplication Layer   │
+                                                                          └─────────────────────────┘
+```
+
+---
+
+## ✨ Key Features & Capabilities
+
+### ⚡ Chrome Extension & DOM Engine
+- **In-Context Native Overlay:** Injects a sleek UI bar (**✨ Generate AI**, **Tone Selector**, and **Streamed Insert / Regenerate** controls) directly into LinkedIn comment boxes.
+- **5 Curated Tones:**
   - **Insightful 💡**: Professional perspectives, key takeaways, and constructive add-ons.
   - **Supportive 🤝**: Genuine encouragement and validation of the post's core ideas.
   - **Constructive 🛠️**: Polite alternative angles or nuances worth considering.
   - **Funny 😄**: Light-hearted, safe professional humor.
   - **Questioning ❓**: Thoughtful questions designed to spark meaningful conversation.
-- **Server-Enforced Anti-AI Rules & Guidelines:**
-  - **Ultra-crisp output:** 1-2 sentences maximum, under 25 words.
-  - **No generic openers:** Bans hollow phrases like *"Great post!"*, *"So true!"*, or *"Thanks for sharing."*
-  - **No AI Buzzwords:** Enforces zero usage of cliché words like *leverage, delve, landscape, game-changer, unlock, navigate*.
-  - **No Personal Names:** Prevents addressing the post author by name for clean, broad readability.
-  - **Prompt Injection Defense & Factuality Enforcer:** Treats untrusted post content strictly as data.
-- **Server-Side Quota & Payment Verification:** Enforces daily limits server-side (`Free`: 2/day, `Pro`: 20/day, `Ultra`: 50/day) and updates plans automatically via Razorpay webhooks.
+
+### 🛡️ LinkedIn Identity Abuse-Prevention Layer
+- **Profile-Bound Quotas:** Extension automatically extracts the user's logged-in LinkedIn profile identifier (`/in/username`) from LinkedIn DOM (`getLinkedInUserIdentifier()`).
+- **Shared Quota Pool:** Aggregates daily comment usage across **all app accounts** linked to the same underlying LinkedIn profile. Prevents users from farming free comment quotas by signing up under multiple Google email addresses for the same LinkedIn profile!
+
+### 🌐 Modern Vite Web Portal (`/extension`)
+- **Single Sign-On Auth Center:** Google OAuth authentication syncs real-time authentication states across web portal and browser extension.
+- **Auto-Region & Currency Detection:** Automatically detects user timezone (`Asia/Kolkata` $\rightarrow$ INR ₹, International $\rightarrow$ USD $) for seamless regional pricing display.
+- **Aceternity UI & Monotone Aesthetics:** Full-bleed grid guide rails (`max-w-7xl`), interactive Aceternity Background Boxes (`border-white/15`), and pure monotone black double-bezel cards (`bg-[#090909]` / `bg-black`).
+
+### 🔒 Backend Server & Payment Gateway
+- **Groq API Key Shielding:** API keys remain strictly on the backend (`backend/.env`). No LLM keys are ever sent to client browsers.
+- **Dynamic Razorpay Checkout API:** Endpoint `/api/v1/payments/create-checkout` dynamically resolves payment links for INR (₹49 Pro / ₹99 Ultra) and USD (₹500 / ₹900).
+- **MongoDB Atlas Cloud Database:** Primary MongoDB Cloud data layer (`User` schema with indexed `uid`, `email`, and `linkedInIdentifier`) with automatic local JSON fallback (`backend/data/users.json`).
 
 ---
 
@@ -45,66 +51,97 @@ Chrome Extension Frontend              Backend Server (Port 5000)               
 
 ```
 linkedin-comments-ai/
-├── backend/                    # Node.js Express Backend API Server
-│   ├── server.js              # Express API server, Groq proxy, auth & quota handlers
-│   ├── package.json           # Server dependencies (express, cors, dotenv)
-│   ├── .env                   # Server environment variables (GROQ_API_KEY, etc.)
-│   └── data/                  # Local user database storage (fallback)
-├── manifest.json              # Chrome Extension Manifest V3 configuration
-├── background.js              # Background service worker & backend proxy handler
-├── config.js                  # Frontend configuration & backend URL endpoint
-├── firebase-db.js             # Client helper for backend API profile endpoints
-├── content/
-│   ├── content.js             # DOM observer, UI injection, and React bridge
-│   └── content.css            # Extension styling & overlay visual design
-├── popup/
-│   ├── popup.html             # Extension settings interface UI (No API key input)
-│   ├── popup.js               # Preferences manager & server connection handler
-│   └── popup.css              # Popup styling & design system
-├── icons/                     # Extension icons (16px, 48px, 128px)
+├── backend/                    # Express Node.js Backend Server
+│   ├── server.js              # Server routes, Groq API proxy, MongoDB & abuse prevention
+│   ├── package.json           # Backend dependencies (express, mongoose, cors, dotenv)
+│   ├── .env                   # Backend environment variables (PORT, MONGODB_URI, GROQ_API_KEY)
+│   ├── .env.example           # Production deployment backend environment template
+│   └── data/                  # Local JSON DB storage fallback (users.json)
+├── website/                    # Vite + React + Tailwind + Aceternity UI Web App
+│   ├── src/
+│   │   ├── components/        # React components (Navbar, UI components, BackgroundBoxes)
+│   │   ├── pages/             # App pages (HomePage.jsx, ExtensionPage.jsx)
+│   │   └── firebase.js        # Production Firebase Auth Client SDK setup
+│   ├── vite.config.js         # Vite bundler configuration with environment resolution
+│   ├── package.json           # Frontend dependencies
+│   └── .env.example           # Frontend environment template
+├── content/                    # Chrome Extension Content Script
+│   ├── content.js             # LinkedIn DOM observer, overlay injector & identifier reader
+│   ├── content.css            # Extension Shadow DOM styles
+│   └── website-bridge.js      # Real-time web-portal authentication bridge
+├── popup/                      # Extension Settings Popup
+│   ├── popup.html             # Extension popup UI linking to web portal
+│   └── popup.js               # Extension popup logic
+├── background.js              # Service worker proxy forwarding requests to backend
+├── config.js                  # Shared extension configuration constants
+├── manifest.json              # Chrome Extension Manifest V3 file
 └── README.md                  # Project documentation
 ```
 
 ---
 
-## 🚀 Setup & Execution
+## 🚀 Quickstart & Setup Guide
 
-### 1. Start the Backend API Server
+### 1. Configure Backend Environment
+Create `backend/.env` (or copy from `backend/.env.example`):
+```env
+PORT=5000
+FRONTEND_URL=https://linkedin-comments-ai.vercel.app
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/eloquix?retryWrites=true&w=majority
+GROQ_API_KEY=gsk_your_groq_api_key_here
+DEFAULT_GROQ_MODEL=llama-3.1-8b-instant
 
+RAZORPAY_PRO_LINK_INR=https://rzp.io/rzp/8fyIuiTV
+RAZORPAY_ULTRA_LINK_INR=https://rzp.io/rzp/AKMnRQ9h
+RAZORPAY_PRO_LINK_USD=https://rzp.io/rzp/lwkO8dn8
+RAZORPAY_ULTRA_LINK_USD=https://rzp.io/rzp/5SoMpUI
+```
+
+Start the Backend API Server:
 ```bash
-# Navigate to the backend directory
 cd backend
-
-# Install dependencies
 npm install
-
-# Configure your environment variables
-# Copy .env.example to .env and insert your Groq API Key
-# GROQ_API_KEY=gsk_your_groq_api_key_here
-
-# Start the server (runs on http://localhost:5000)
 npm start
 ```
 
-### 2. Load the Chrome Extension
+### 2. Configure Frontend Web App
+Create `.env` in the root or `website/`:
+```env
+BACKEND_URL=http://localhost:5000
+FIREBASE_API_KEY=AIzaSyBuaI7XcvOxdUmwX8Xawz1vb1GGKDr-TVI
+FIREBASE_AUTH_DOMAIN=eloquix-609b8.firebaseapp.com
+FIREBASE_PROJECT_ID=eloquix-609b8
+FIREBASE_STORAGE_BUCKET=eloquix-609b8.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=427738230416
+FIREBASE_APP_ID=1:427738230416:web:ab265d08ba3827d583f215
+```
 
+Start the Web App Dev Server:
+```bash
+cd website
+npm install
+npm run dev
+```
+
+### 3. Load Chrome Extension
 1. Open Chrome and navigate to `chrome://extensions/`.
-2. Toggle **Developer mode** in the upper-right corner.
-3. Click **Load unpacked** in the top-left corner and select the root `linkedin-comments-ai` project folder.
-4. Click the extension icon to verify **Server Active** status!
+2. Enable **Developer mode** (top-right toggle).
+3. Click **Load unpacked** and select the project root directory `linkedin-comments-ai`.
+4. Open any LinkedIn post to experience the **✨ Generate AI** overlay!
 
 ---
 
-## 🔒 Security & Privacy
+## 🔒 Security & Anti-AI Rules
 
-- **Zero Key Exposure:** Groq API keys are stored strictly on the server in `backend/.env`. Chrome extension clients never see or store LLM API keys.
-- **Atomic Server Quota Enforcement:** Daily usage counts and tier restrictions are validated server-side.
-- **Verified Payment Webhooks:** Subscription upgrades are triggered via Razorpay HMAC cryptographic webhooks (`POST /api/v1/payments/webhook`).
+- **Zero Key Exposure:** Groq API keys are stored strictly in backend server environment variables.
+- **Strict Anti-AI Voice Guidelines:**
+  - Max 1-2 sentences, under 25 words.
+  - Zero hollow openers (*"Great post!"*, *"So true!"*, *"Thanks for sharing"*).
+  - Banned AI buzzwords (*leverage, delve, landscape, game-changer, unlock, navigate*).
+  - No personal names addressed in comment bodies.
+- **Git Security:** All `.env` files and secret keys are automatically untracked via updated `.gitignore` rules.
 
 ---
 
-## ❓ Troubleshooting
-
-- **"Unable to connect to Eloquix Backend Server"**: Make sure the backend server is running (`cd backend && npm start`) on `http://localhost:5000`.
-- **"Groq Key Missing"**: Set `GROQ_API_KEY` in `backend/.env` and restart the backend server.
-- **Button not showing on LinkedIn**: Refresh the LinkedIn page to ensure the content script is loaded.
+## 📄 License
+Distributed under the MIT License. See `LICENSE` for details.
