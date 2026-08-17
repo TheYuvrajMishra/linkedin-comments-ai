@@ -7,7 +7,7 @@ import SideMarginPatterns from '../components/ui/side-margin-patterns';
 function GridSection({ children, className = "", id }) {
   return (
     <div id={id} className={`relative w-full border-b border-white/10 ${className}`}>
-      <div className="max-w-4xl mx-auto px-6 sm:px-12 relative py-12 md:py-16">
+      <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-16 md:py-24">
         <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
         <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
         {children}
@@ -15,6 +15,7 @@ function GridSection({ children, className = "", id }) {
     </div>
   );
 }
+
 
 export default function TermsPage() {
   useEffect(() => {
