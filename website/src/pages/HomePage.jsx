@@ -488,11 +488,14 @@ export default function HomePage() {
               <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
 
               <div>Quick Comment AI &bull; Full-Bleed Structural Intersection Architecture</div>
-              <Link to="/extension" className="text-neutral-400 hover:text-white transition-colors">
-                /extension Portal &rarr;
-              </Link>
+              <div className="flex items-center gap-5 text-neutral-400">
+                <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+                <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                <Link to="/extension" className="hover:text-white transition-colors">/extension Portal &rarr;</Link>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

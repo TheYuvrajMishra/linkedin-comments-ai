@@ -757,11 +757,14 @@ export default function ExtensionPage() {
               <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
 
               <div>Quick Comment AI Portal (/extension) &bull; Pre-Launch Waitlist Architecture</div>
-              <Link to="/" className="text-neutral-400 hover:text-white transition-colors">
-                &larr; Back to Overview
-              </Link>
+              <div className="flex items-center gap-5 text-neutral-400">
+                <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+                <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
+                <Link to="/" className="hover:text-white transition-colors">&larr; Back to Overview</Link>
+              </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>
