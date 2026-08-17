@@ -388,7 +388,7 @@ export default function ExtensionPage() {
               </div>
             </GridSection>
 
-            {/* 2. WAITLIST MODE: LIVE COUNTER CARD (NOW BELOW THE GOOGLE LOGIN BUTTON CARD) */}
+            {/* 2. WAITLIST MODE: LIVE COUNTER CARD (BELOW GOOGLE LOGIN BUTTON CARD) */}
             {isWaitlistMode && (
               <GridSection id="waitlist-counter-section">
                 <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
@@ -432,7 +432,7 @@ export default function ExtensionPage() {
               </GridSection>
             )}
 
-            {/* 3. SUBSCRIPTION TIER SELECTION (PERFECTLY VISIBLE IN BOTH MODES, BUTTONS LOCKED IN WAITLIST MODE) */}
+            {/* 3. SUBSCRIPTION TIER SELECTION (3 TIERS: FREE, PRO, ULTRA) */}
             <GridSection id="pricing-section">
               <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
@@ -458,8 +458,84 @@ export default function ExtensionPage() {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                {/* Pro Plan */}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {/* 1. Free Plan */}
+                <div className="relative bg-[#090909] border border-white/15 p-2 rounded-[2.2rem] backdrop-blur-md hover:border-white/30 transition-colors group">
+                  <GlowingEffect
+                    spread={40}
+                    glow={true}
+                    disabled={false}
+                    proximity={64}
+                    inactiveZone={0.01}
+                    borderWidth={1.5}
+                  />
+                  <div className="relative z-10 bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 md:p-10 h-full flex flex-col justify-between overflow-hidden">
+                    <div 
+                      className="absolute inset-0 z-0 opacity-15 pointer-events-none"
+                      style={{
+                        backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px)`,
+                        backgroundSize: '12px 12px'
+                      }}
+                    />
+
+                    <div className="relative z-10">
+                      <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-xl font-bold text-white">Free Plan</h4>
+                        <span className="text-[10px] font-mono text-neutral-300 border border-white/15 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md">
+                          2 COMMENTS/DAY
+                        </span>
+                      </div>
+                      <div className="text-3xl font-bold text-white font-mono mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-400">
+                        ₹0 <span className="text-xs font-normal text-neutral-500">/ forever</span>
+                      </div>
+                      <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> 2 AI comments per day
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> All 5 comment tones
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> Direct in-feed DOM generator
+                        </li>
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> Standard Groq API speed
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="relative z-10">
+                      {isWaitlistMode ? (
+                        <button
+                          disabled
+                          className="w-full rounded-full py-3.5 px-6 bg-white/5 border border-white/15 text-neutral-500 font-mono text-xs uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed opacity-80"
+                        >
+                          <svg className="w-3.5 h-3.5 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                          </svg>
+                          <span>Locked &bull; Unlocks at Launch</span>
+                        </button>
+                      ) : !user ? (
+                        <button
+                          onClick={() => {
+                            const authSec = document.getElementById('auth-section');
+                            if (authSec) authSec.scrollIntoView({ behavior: 'smooth' });
+                          }}
+                          className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 font-mono text-xs uppercase tracking-wider transition-colors"
+                        >
+                          Included Free &bull; Sign In
+                        </button>
+                      ) : (
+                        <div className="w-full rounded-full py-3.5 px-6 bg-white/5 border border-white/10 text-center font-mono text-xs text-neutral-300 uppercase tracking-wider">
+                          {(userProfile?.plan || 'free') === 'free' ? 'Current Active Plan' : 'Free Included'}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 2. Pro Plan */}
                 <div className="relative bg-[#090909] border border-white/15 p-2 rounded-[2.2rem] backdrop-blur-md hover:border-white/30 transition-colors group">
                   <GlowingEffect
                     spread={40}
@@ -542,7 +618,7 @@ export default function ExtensionPage() {
                   </div>
                 </div>
 
-                {/* Ultra Plan */}
+                {/* 3. Ultra Plan */}
                 <div className="relative group">
                   <div className="absolute -inset-1 rounded-[2.3rem] bg-gradient-to-r from-white/20 via-neutral-300/30 to-white/20 blur-lg opacity-40 group-hover:opacity-80 transition-opacity duration-700 pointer-events-none" />
 
