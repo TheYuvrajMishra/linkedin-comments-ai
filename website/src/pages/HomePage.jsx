@@ -1,10 +1,19 @@
-import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { BackgroundBeams } from '../components/ui/background-beams';
 import { GlowingEffect } from '../components/ui/glowing-effect';
 import { Boxes } from '../components/ui/background-boxes';
 import SideMarginPatterns from '../components/ui/side-margin-patterns';
+import { WAITLIST_MODE, WAITLIST_TARGET } from '../config';
+import {
+  auth,
+  googleProvider,
+  signInWithPopup,
+  onAuthStateChanged
+} from '../firebase';
+
+const BACKEND_URL = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_BACKEND_URL) || process.env.BACKEND_URL || "http://localhost:5000";
 
 function GridSection({ children, className = "", id }) {
   return (
@@ -21,9 +30,91 @@ function GridSection({ children, className = "", id }) {
 }
 
 export default function HomePage() {
+  const navigate = useNavigate();
+  const [waitlistCount, setWaitlistCount] = useState(0);
+  const [isWaitlistMode, setIsWaitlistMode] = useState(WAITLIST_MODE);
+  const [user, setUser] = useState(null);
+  const [authSubmitting, setAuthSubmitting] = useState(false);
+
   useEffect(() => {
     document.title = "Quick Comment AI - LinkedIn AI Comment Generator & Chrome Extension";
+
+    fetch(`${BACKEND_URL}/api/v1/waitlist/count`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.success) {
+          setWaitlistCount(data.count || 0);
+          if (typeof data.waitlistMode === 'boolean') {
+            setIsWaitlistMode(data.waitlistMode);
+          }
+        }
+      })
+      .catch(err => console.warn('Waitlist count fetch offline:', err));
   }, []);
+
+  // Listen for user auth & sync with waitlist backend
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser && isWaitlistMode) {
+        try {
+          const idToken = await currentUser.getIdToken();
+          const res = await fetch(`${BACKEND_URL}/api/v1/waitlist/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              idToken: idToken,
+              email: currentUser.email,
+              name: currentUser.displayName || '',
+              uid: currentUser.uid
+            })
+          });
+          const data = await res.json();
+          if (data.success && data.count !== undefined) {
+            setWaitlistCount(data.count);
+          }
+        } catch (e) {
+          console.warn("Could not sync waitlist from homepage:", e);
+        }
+      }
+    });
+
+    return () => unsubscribe();
+  }, [isWaitlistMode]);
+
+  const handleWaitlistAuth = async () => {
+    if (user) {
+      navigate('/extension');
+      return;
+    }
+
+    setAuthSubmitting(true);
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      if (result?.user) {
+        const idToken = await result.user.getIdToken();
+        const res = await fetch(`${BACKEND_URL}/api/v1/waitlist/join`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            idToken: idToken,
+            email: result.user.email,
+            name: result.user.displayName || '',
+            uid: result.user.uid
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.count !== undefined) {
+          setWaitlistCount(data.count);
+        }
+      }
+    } catch (err) {
+      console.error("Homepage Google auth error:", err);
+    } finally {
+      setAuthSubmitting(false);
+    }
+  };
+
   return (
     <div className="relative min-h-[100dvh] bg-black text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden font-sans">
       {/* Structural Side Margin Line Patterns (Both Sides) */}
@@ -47,8 +138,18 @@ export default function HomePage() {
 
           {/* Main Content Sections */}
           <main>
-            {/* Hero Section with Aceternity Background Boxes */}
-            <div className="relative w-full border-b border-white/10 overflow-hidden">
+            {/* Hero Section with Aceternity Background Boxes & Big Watermark Count */}
+            <div className="relative w-full border-b border-white/10 overflow-hidden min-h-[500px]">
+              {/* Giant Subtle Background Watermark Waitlist Count */}
+              <div className="absolute right-4 bottom-2 md:right-12 md:bottom-4 z-0 select-none pointer-events-none text-right">
+                <div className="text-[11rem] sm:text-[16rem] md:text-[22rem] lg:text-[26rem] font-mono font-extrabold text-white/[0.035] leading-none tracking-tighter">
+                  {String(waitlistCount).padStart(3, '0')}
+                </div>
+                <div className="text-[9px] sm:text-[11px] font-mono text-neutral-600 tracking-[0.3em] uppercase -mt-4 md:-mt-10 pr-2">
+                  WAITLIST SIGNUPS &bull; TARGET {WAITLIST_TARGET}
+                </div>
+              </div>
+
               <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-16 md:py-24">
                 {/* Vertical Guide Rails */}
                 <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
@@ -72,17 +173,45 @@ export default function HomePage() {
                   {/* Double-Bezel Nested CTA Pill */}
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pointer-events-auto">
                     <div className="p-1 rounded-[2.2rem] bg-neutral-900 border border-white/15">
-                      <Link
-                        to="/extension"
-                        className="group rounded-[calc(2.2rem-0.25rem)] px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-neutral-200 active:scale-[0.98] transition-all duration-300"
-                      >
-                        <span>Launch Extension Portal (/extension)</span>
-                        <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform duration-300">
-                          <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                            <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </div>
-                      </Link>
+                      {isWaitlistMode ? (
+                        <button
+                          onClick={handleWaitlistAuth}
+                          disabled={authSubmitting}
+                          className="group w-full sm:w-auto rounded-[calc(2.2rem-0.25rem)] px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-neutral-200 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
+                        >
+                          <div className="flex items-center gap-3">
+                            {!user && (
+                              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
+                                <path d="M12.545,10.239v3.821h5.445c-0.712,2.315-2.647,3.972-5.445,3.972c-3.332,0-6.033-2.701-6.033-6.032 s2.701-6.032,6.033-6.032c1.498,0,2.866,0.549,3.921,1.453l2.814-2.814C17.503,2.988,15.139,2,12.545,2 C7.021,2,2.543,6.477,2.543,12s4.478,10,10.002,10c8.396,0,10.249-7.85,9.426-11.761H12.545z"/>
+                              </svg>
+                            )}
+                            <span>
+                              {authSubmitting
+                                ? 'Connecting to Google...'
+                                : user
+                                ? `Waitlist Spot Reserved • View Account`
+                                : 'Join Waitlist with Google'}
+                            </span>
+                          </div>
+                          <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform duration-300">
+                            <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" stroke="currentColor">
+                              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        </button>
+                      ) : (
+                        <Link
+                          to="/extension"
+                          className="group rounded-[calc(2.2rem-0.25rem)] px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-neutral-200 active:scale-[0.98] transition-all duration-300"
+                        >
+                          <span>Launch Extension Portal (/extension)</span>
+                          <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform duration-300">
+                            <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" stroke="currentColor">
+                              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        </Link>
+                      )}
                     </div>
 
                     <a
@@ -303,27 +432,48 @@ export default function HomePage() {
                     />
 
                     <div className="relative z-10">
-                      <h3 className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-sans font-bold bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-400 mb-2 tracking-tight">Ready to Start?</h3>
+                      <h3 className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-sans font-bold bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-400 mb-2 tracking-tight">
+                        {isWaitlistMode ? 'Reserve Your Pre-Launch Waitlist Spot' : 'Ready to Start?'}
+                      </h3>
                       <p className="text-xs sm:text-sm font-mono text-neutral-400 max-w-lg leading-relaxed">
-                        Access your session center, view daily quota usage, and manage your plan subscriptions.
+                        {isWaitlistMode
+                          ? `Join ${waitlistCount} other members on the pre-launch waitlist before we publish to the Chrome Web Store.`
+                          : 'Access your session center, view daily quota usage, and manage your plan subscriptions.'}
                       </p>
                     </div>
 
                     {/* Double-Bezel High-Shine CTA Pill */}
                     <div className="relative z-10 p-1 rounded-full bg-neutral-900 border border-white/20 shadow-2xl hover:border-white/40 transition-colors shrink-0">
-                      <Link
-                        to="/extension"
-                        className="group/btn relative rounded-full px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-3 hover:bg-neutral-100 active:scale-[0.98] transition-all overflow-hidden"
-                      >
-                        {/* Shimmer sweep effect */}
-                        <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-1000 ease-in-out pointer-events-none" />
-                        <span className="relative z-10">Go to /extension Portal</span>
-                        <div className="relative z-10 w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:translate-x-1 group-hover/btn:bg-black group-hover/btn:text-white transition-all duration-300">
-                          <svg className="w-3.5 h-3.5 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                            <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </div>
-                      </Link>
+                      {isWaitlistMode ? (
+                        <button
+                          onClick={handleWaitlistAuth}
+                          disabled={authSubmitting}
+                          className="group/btn relative rounded-full px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-3 hover:bg-neutral-100 active:scale-[0.98] transition-all overflow-hidden disabled:opacity-50"
+                        >
+                          <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-1000 ease-in-out pointer-events-none" />
+                          <span className="relative z-10">
+                            {user ? 'Waitlist Spot Reserved • View Portal' : 'Join Waitlist with Google'}
+                          </span>
+                          <div className="relative z-10 w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:translate-x-1 group-hover/btn:bg-black group-hover/btn:text-white transition-all duration-300">
+                            <svg className="w-3.5 h-3.5 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        </button>
+                      ) : (
+                        <Link
+                          to="/extension"
+                          className="group/btn relative rounded-full px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-3 hover:bg-neutral-100 active:scale-[0.98] transition-all overflow-hidden"
+                        >
+                          <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-1000 ease-in-out pointer-events-none" />
+                          <span className="relative z-10">Go to /extension Portal</span>
+                          <div className="relative z-10 w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:translate-x-1 group-hover/btn:bg-black group-hover/btn:text-white transition-all duration-300">
+                            <svg className="w-3.5 h-3.5 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </div>
+                        </Link>
+                      )}
                     </div>
                   </div>
                 </div>

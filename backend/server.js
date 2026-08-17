@@ -25,12 +25,25 @@ app.use(cors({
 }));
 app.use(express.json({ limit: "2mb" }));
 
+// Handle invalid JSON payload errors gracefully
+app.use((err, req, res, next) => {
+  if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    return res.status(400).json({ success: false, error: 'Invalid JSON request body payload.' });
+  }
+  next(err);
+});
+
+
 // Constants & Tier Limits
 const PLAN_LIMITS = {
   free: 2,
   pro: 20,
   ultra: 50
 };
+
+// Feature Flag & Waitlist Target
+const WAITLIST_MODE = (process.env.WAITLIST_MODE ?? 'true') !== 'false';
+const WAITLIST_TARGET = 100;
 
 // In-Memory Comment Cache to save Groq API tokens & speed up repeat requests
 const commentCache = new Map();
@@ -51,6 +64,16 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.models.User || mongoose.model("User", userSchema);
+
+const waitlistSchema = new mongoose.Schema({
+  email: { type: String, required: true, unique: true, index: true, lowercase: true, trim: true },
+  name: { type: String, default: "" },
+  uid: { type: String, required: true, index: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const Waitlist = mongoose.models.Waitlist || mongoose.model("Waitlist", waitlistSchema);
+
 
 let isMongoConnected = false;
 const mongoUri = process.env.MONGODB_URI;
@@ -77,6 +100,8 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+const WAITLIST_DB_FILE = path.join(DATA_DIR, "waitlist.json");
+
 function loadLocalUsers() {
   try {
     if (fs.existsSync(DB_FILE)) {
@@ -97,9 +122,67 @@ function saveLocalUsers(users) {
   }
 }
 
+function loadLocalWaitlist() {
+  try {
+    if (fs.existsSync(WAITLIST_DB_FILE)) {
+      const raw = fs.readFileSync(WAITLIST_DB_FILE, "utf-8");
+      return JSON.parse(raw);
+    }
+  } catch (err) {
+    console.error("Error reading local waitlist DB:", err);
+  }
+  return {};
+}
+
+function saveLocalWaitlist(waitlist) {
+  try {
+    fs.writeFileSync(WAITLIST_DB_FILE, JSON.stringify(waitlist, null, 2), "utf-8");
+  } catch (err) {
+    console.error("Error writing local waitlist DB:", err);
+  }
+}
+
+async function verifyGoogleToken(idToken) {
+  if (!idToken) return null;
+  try {
+    const response = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${idToken}`);
+    if (!response.ok) {
+      console.warn("Google tokeninfo HTTP status:", response.status);
+      return null;
+    }
+    const payload = await response.json();
+    if (payload && (payload.email || payload.sub)) {
+      return {
+        email: (payload.email || "").toLowerCase().trim(),
+        sub: payload.sub,
+        name: payload.name || ""
+      };
+    }
+    return null;
+  } catch (err) {
+    console.error("Error verifying Google ID token server-side:", err.message);
+    return null;
+  }
+}
+
+const rateLimitMap = new Map();
+function checkRateLimit(ip, maxRequests = 15, windowMs = 15 * 60 * 1000) {
+  const now = Date.now();
+  const record = rateLimitMap.get(ip) || { count: 0, resetTime: now + windowMs };
+  if (now > record.resetTime) {
+    record.count = 1;
+    record.resetTime = now + windowMs;
+  } else {
+    record.count += 1;
+  }
+  rateLimitMap.set(ip, record);
+  return record.count <= maxRequests;
+}
+
 function getTodayString() {
   return new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 }
+
 
 // ----------------------------------------------------
 // UNIFIED USER DB DATA ACCESS LAYER
@@ -379,6 +462,127 @@ const healthHandler = (req, res) => {
 app.get("/health", healthHandler);
 app.get("/api/v1/health", healthHandler);
 app.get("/", healthHandler);
+
+// 1b. Config Endpoint
+app.get("/api/v1/config", (req, res) => {
+  res.json({
+    success: true,
+    waitlistMode: WAITLIST_MODE,
+    waitlistTarget: WAITLIST_TARGET
+  });
+});
+
+// 1c. Waitlist GET Count Endpoint
+app.get("/api/v1/waitlist/count", async (req, res) => {
+  try {
+    let count = 0;
+    if (isMongoConnected) {
+      count = await Waitlist.countDocuments();
+    } else {
+      const local = loadLocalWaitlist();
+      count = Object.keys(local).length;
+    }
+    return res.json({
+      success: true,
+      count: count,
+      target: WAITLIST_TARGET,
+      waitlistMode: WAITLIST_MODE
+    });
+  } catch (err) {
+    console.error("Error fetching waitlist count:", err);
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 1d. Waitlist POST Join Endpoint
+app.post("/api/v1/waitlist/join", async (req, res) => {
+  try {
+    const clientIp = req.ip || req.headers["x-forwarded-for"] || "127.0.0.1";
+    if (!checkRateLimit(clientIp, 15, 15 * 60 * 1000)) {
+      return res.status(429).json({
+        success: false,
+        error: "Too many waitlist signup attempts from this IP address. Please try again later."
+      });
+    }
+
+    const { idToken, email, name, uid } = req.body || {};
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanUid = uid || "";
+    const cleanName = (name || "").trim();
+
+    if (!cleanEmail || !cleanEmail.includes("@")) {
+      return res.status(400).json({ success: false, error: "A valid email address is required." });
+    }
+
+    // Validate Google Token server-side if provided
+    if (idToken) {
+      const tokenData = await verifyGoogleToken(idToken);
+      if (tokenData && tokenData.email && tokenData.email !== cleanEmail) {
+        return res.status(401).json({ success: false, error: "Google OAuth token email does not match requested email." });
+      }
+    }
+
+    let alreadyJoined = false;
+    let totalCount = 0;
+
+    // Deduplicate by email in MongoDB Cloud DB
+    if (isMongoConnected) {
+      const existing = await Waitlist.findOne({ email: cleanEmail });
+      if (existing) {
+        alreadyJoined = true;
+        if (cleanName && !existing.name) {
+          existing.name = cleanName;
+          await existing.save();
+        }
+      } else {
+        await Waitlist.create({
+          email: cleanEmail,
+          name: cleanName,
+          uid: cleanUid || `waitlist_${Date.now()}`
+        });
+      }
+      totalCount = await Waitlist.countDocuments();
+    } else {
+      // Fallback to Local JSON storage
+      const local = loadLocalWaitlist();
+      if (local[cleanEmail]) {
+        alreadyJoined = true;
+        if (cleanName && !local[cleanEmail].name) {
+          local[cleanEmail].name = cleanName;
+          saveLocalWaitlist(local);
+        }
+      } else {
+        local[cleanEmail] = {
+          email: cleanEmail,
+          name: cleanName,
+          uid: cleanUid || `waitlist_${Date.now()}`,
+          createdAt: new Date().toISOString()
+        };
+        saveLocalWaitlist(local);
+      }
+      totalCount = Object.keys(local).length;
+    }
+
+    // Ensure full user profile is created/linked so they remain authenticated across the app seamlessly
+    if (cleanUid) {
+      await getUserRecord(cleanUid, cleanEmail, "");
+    }
+
+    return res.json({
+      success: true,
+      alreadyJoined: alreadyJoined,
+      count: totalCount,
+      target: WAITLIST_TARGET,
+      message: alreadyJoined
+        ? "You are already registered on the pre-launch waitlist!"
+        : "Successfully joined the pre-launch waitlist!"
+    });
+  } catch (err) {
+    console.error("Waitlist join error:", err);
+    return res.status(500).json({ success: false, error: err.message || "Failed to join waitlist." });
+  }
+});
+
 
 // 2. Auth Verification & User Profile Retrieval
 app.post("/api/v1/auth/verify", async (req, res) => {
