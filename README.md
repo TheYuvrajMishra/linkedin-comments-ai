@@ -112,12 +112,12 @@ npm start
 Create `.env` in the root or `website/`:
 ```env
 BACKEND_URL=http://localhost:5000
-FIREBASE_API_KEY=AIzaSyBuaI7XcvOxdUmwX8Xawz1vb1GGKDr-TVI
-FIREBASE_AUTH_DOMAIN=eloquix-609b8.firebaseapp.com
-FIREBASE_PROJECT_ID=eloquix-609b8
-FIREBASE_STORAGE_BUCKET=eloquix-609b8.firebasestorage.app
-FIREBASE_MESSAGING_SENDER_ID=427738230416
-FIREBASE_APP_ID=1:427738230416:web:ab265d08ba3827d583f215
+FIREBASE_API_KEY=your_firebase_api_key_here
+FIREBASE_AUTH_DOMAIN=your-app.firebaseapp.com
+FIREBASE_PROJECT_ID=your-app
+FIREBASE_STORAGE_BUCKET=your-app.firebasestorage.app
+FIREBASE_MESSAGING_SENDER_ID=1234567890
+FIREBASE_APP_ID=1:1234567890:web:abcdef123456
 ```
 
 Start the Web App Dev Server:

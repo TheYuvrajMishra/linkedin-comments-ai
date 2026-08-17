@@ -62,11 +62,9 @@ export default function ExtensionPage() {
 
           // Save to local storage for extension bridge
           localStorage.setItem('quick_comment_ai_auth', JSON.stringify(authData));
-          localStorage.setItem('eloquix_auth', JSON.stringify(authData));
 
           // Post message to window for content script / bridge
           window.postMessage({ type: 'QUICK_COMMENT_AI_AUTH_STATE', userAuth: authData }, '*');
-          window.postMessage({ type: 'ELOQUIX_AUTH_STATE', userAuth: authData }, '*');
 
           setUser(currentUser);
           setAuthError('');
@@ -85,9 +83,7 @@ export default function ExtensionPage() {
         }
       } else {
         localStorage.removeItem('quick_comment_ai_auth');
-        localStorage.removeItem('eloquix_auth');
         window.postMessage({ type: 'QUICK_COMMENT_AI_AUTH_STATE', userAuth: null }, '*');
-        window.postMessage({ type: 'ELOQUIX_AUTH_STATE', userAuth: null }, '*');
         setUser(null);
         setUserProfile(null);
       }

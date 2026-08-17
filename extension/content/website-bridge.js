@@ -7,7 +7,7 @@
 
   function syncSessionToExtension() {
     try {
-      const rawAuth = localStorage.getItem("quick_comment_ai_auth") || localStorage.getItem("eloquix_auth");
+      const rawAuth = localStorage.getItem("quick_comment_ai_auth");
       if (rawAuth) {
         const userAuth = JSON.parse(rawAuth);
         if (userAuth && userAuth.uid && userAuth.email) {
@@ -31,7 +31,7 @@
 
   // 2. Listen for postMessage from React app
   window.addEventListener("message", (event) => {
-    if (event.data && (event.data.type === "QUICK_COMMENT_AI_AUTH_STATE" || event.data.type === "ELOQUIX_AUTH_STATE")) {
+    if (event.data && event.data.type === "QUICK_COMMENT_AI_AUTH_STATE") {
       const userAuth = event.data.userAuth;
       if (userAuth && userAuth.uid && userAuth.email) {
         chrome.storage.local.set({ userAuth }, () => {
@@ -47,7 +47,7 @@
 
   // 3. Listen for window storage changes (cross-tab sync)
   window.addEventListener("storage", (event) => {
-    if (event.key === "quick_comment_ai_auth" || event.key === "eloquix_auth") {
+    if (event.key === "quick_comment_ai_auth") {
       syncSessionToExtension();
     }
   });

@@ -21,13 +21,13 @@ const getEnvVar = (key, fallback) => {
 };
 
 const firebaseConfig = {
-  apiKey: getEnvVar('FIREBASE_API_KEY', 'AIzaSyBuaI7XcvOxdUmwX8Xawz1vb1GGKDr-TVI'),
-  authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN', 'eloquix-609b8.firebaseapp.com'),
-  projectId: getEnvVar('FIREBASE_PROJECT_ID', 'eloquix-609b8'),
-  storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET', 'eloquix-609b8.firebasestorage.app'),
-  messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID', '427738230416'),
-  appId: getEnvVar('FIREBASE_APP_ID', '1:427738230416:web:ab265d08ba3827d583f215'),
-  measurementId: getEnvVar('FIREBASE_MEASUREMENT_ID', 'G-8F86HP7G2Y')
+  apiKey: getEnvVar('FIREBASE_API_KEY', ''),
+  authDomain: getEnvVar('FIREBASE_AUTH_DOMAIN', ''),
+  projectId: getEnvVar('FIREBASE_PROJECT_ID', ''),
+  storageBucket: getEnvVar('FIREBASE_STORAGE_BUCKET', ''),
+  messagingSenderId: getEnvVar('FIREBASE_MESSAGING_SENDER_ID', ''),
+  appId: getEnvVar('FIREBASE_APP_ID', ''),
+  measurementId: getEnvVar('FIREBASE_MEASUREMENT_ID', '')
 };
 
 const app = initializeApp(firebaseConfig);
