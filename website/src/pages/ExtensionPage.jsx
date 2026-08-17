@@ -23,6 +23,28 @@ const PAYMENT_LINKS = {
   }
 };
 
+function GridSection({ children, className = "", id }) {
+  return (
+    <div id={id} className={`relative w-full border-b border-white/10 ${className}`}>
+      <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-16 md:py-24">
+        {/* Vertical Guide Rails slicing through horizontal section borders */}
+        <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
+        <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
+
+        {/* Absolute Intersection Cross-Ticks */}
+        <span className="absolute -top-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">
+          +
+        </span>
+        <span className="absolute -top-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">
+          +
+        </span>
+
+        {children}
+      </div>
+    </div>
+  );
+}
+
 export default function ExtensionPage() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -145,39 +167,53 @@ export default function ExtensionPage() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#050505] text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden">
+    <div className="relative min-h-[100dvh] bg-[#050505] text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden font-sans">
       {/* Aceternity Background Beams */}
-      <BackgroundBeams className="pointer-events-none opacity-40 z-0" />
+      <BackgroundBeams className="pointer-events-none opacity-30 z-0" />
 
       <div className="relative z-10 flex flex-col justify-between min-h-[100dvh]">
-        <div>
-          {/* Shared Consistent Floating Navbar */}
-          <Navbar />
+        {/* Full-width Structural Grid Architecture */}
+        <div className="w-full relative">
+          
+          {/* Header Section */}
+          <div className="relative w-full border-b border-white/10 bg-[#050505]/80 backdrop-blur-md">
+            <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-4">
+              <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
+              <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
+              <span className="absolute -top-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
+              <span className="absolute -top-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
+              <Navbar />
+            </div>
+          </div>
 
-          {/* Main Consistent Container */}
-          <main className="max-w-5xl mx-auto px-4 py-8 md:py-16">
+          {/* Main Content Sections */}
+          <main>
             {/* Header Title Section */}
-            <section className="mb-12">
-              <h1 className="relative z-10 text-3xl md:text-5xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 via-neutral-200 to-neutral-500 mb-3 leading-tight">
+            <GridSection>
+              <h1 className="relative z-10 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 via-neutral-200 to-neutral-500 mb-4 leading-tight">
                 Extension Session & Account Center
               </h1>
-              <p className="text-sm font-mono text-zinc-400 max-w-xl leading-relaxed">
+              <p className="text-sm sm:text-base font-mono text-zinc-400 max-w-2xl leading-relaxed">
                 Single source of truth for Eloquix Chrome Extension authentication. Logging in here automatically authenticates your browser extension in real time.
               </p>
-            </section>
+            </GridSection>
 
             {/* Gating Notice Banner */}
             {gateNotice && !user && (
-              <div className="mb-8 p-4 bg-zinc-950 border border-white/15 rounded-2xl text-xs font-mono text-zinc-200 flex justify-between items-center">
-                <span>{gateNotice}</span>
-                <button onClick={() => setGateNotice('')} className="text-zinc-500 hover:text-white uppercase tracking-wider ml-4">
-                  Dismiss
-                </button>
+              <div className="w-full border-b border-white/10">
+                <div className="max-w-7xl mx-auto px-6 sm:px-12 py-4">
+                  <div className="p-4 bg-zinc-950 border border-white/15 rounded-2xl text-xs font-mono text-zinc-200 flex justify-between items-center">
+                    <span>{gateNotice}</span>
+                    <button onClick={() => setGateNotice('')} className="text-zinc-500 hover:text-white uppercase tracking-wider ml-4">
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Double-Bezel Auth Card Container */}
-            <section id="auth-section" className="mb-16">
+            {/* Auth Card Section */}
+            <GridSection id="auth-section">
               <div className="bg-white/[0.03] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
                 <div className="bg-zinc-950/90 border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-6 md:p-10">
                   {loading ? (
@@ -251,7 +287,7 @@ export default function ExtensionPage() {
                             <span>{authSubmitting ? 'Authenticating...' : 'Continue with Google'}</span>
                           </div>
                           <div className="w-7 h-7 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform duration-300">
-                            <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <svg className="w-4 h-4 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
                               <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -261,10 +297,10 @@ export default function ExtensionPage() {
                   )}
                 </div>
               </div>
-            </section>
+            </GridSection>
 
             {/* Subscription Section */}
-            <section className="mb-16">
+            <GridSection>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h3 className="relative z-10 text-2xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400">Subscription Tier Selection</h3>
@@ -339,7 +375,7 @@ export default function ExtensionPage() {
                         >
                           <span>Upgrade Pro ({currency === 'inr' ? '₹49/mo' : '$4.99/mo'})</span>
                           <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
                               <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -393,7 +429,7 @@ export default function ExtensionPage() {
                         >
                           <span>Upgrade Ultra ({currency === 'inr' ? '₹99/mo' : '$7.99/mo'})</span>
                           <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
                               <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </div>
@@ -403,17 +439,26 @@ export default function ExtensionPage() {
                   </div>
                 </div>
               </div>
-            </section>
+            </GridSection>
           </main>
-        </div>
 
-        {/* Consistent Footer */}
-        <footer className="max-w-5xl mx-auto w-full px-4 py-8 border-t border-white/10 text-xs font-mono text-zinc-600 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div>Eloquix Portal (/extension) &bull; Google Auth Edition</div>
-          <Link to="/" className="text-zinc-400 hover:text-white transition-colors">
-            &larr; Back to Overview
-          </Link>
-        </footer>
+          {/* Footer Section */}
+          <div className="relative w-full border-b border-white/10">
+            <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-8 text-xs font-mono text-zinc-600 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
+              <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
+              <span className="absolute -top-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
+              <span className="absolute -top-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
+              <span className="absolute -bottom-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
+              <span className="absolute -bottom-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
+
+              <div>Eloquix Portal (/extension) &bull; Full-Bleed Structural Intersections</div>
+              <Link to="/" className="text-zinc-400 hover:text-white transition-colors">
+                &larr; Back to Overview
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
