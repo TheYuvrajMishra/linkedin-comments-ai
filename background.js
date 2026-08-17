@@ -13,7 +13,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-async function handleCommentGeneration({ postText, tone, customInstructions, regenerate }) {
+async function handleCommentGeneration({ postText, tone, customInstructions, regenerate, linkedInIdentifier }) {
   // 1. Get backend URL & user authentication from storage
   const storage = await chrome.storage.local.get(["userAuth"]);
   const backendUrl = BACKEND_URL || "http://localhost:5000";
@@ -46,7 +46,8 @@ async function handleCommentGeneration({ postText, tone, customInstructions, reg
         postText: sanitizedPostText,
         tone: tone,
         customInstructions: sanitizedCustomInstructions,
-        regenerate: regenerate
+        regenerate: regenerate,
+        linkedInIdentifier: linkedInIdentifier || null
       })
     });
 

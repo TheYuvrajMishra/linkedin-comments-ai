@@ -628,6 +628,8 @@ function injectAIElements(editor) {
           return;
         }
 
+        const linkedInIdentifier = getLinkedInUserIdentifier();
+
         // Send generation request to background script
         chrome.runtime.sendMessage(
           {
@@ -635,7 +637,8 @@ function injectAIElements(editor) {
             postText: postText,
             tone: currentTone,
             customInstructions: customInstructions,
-            regenerate: hasGenerated
+            regenerate: hasGenerated,
+            linkedInIdentifier: linkedInIdentifier
           },
           (response) => {
             isGenerating = false;
@@ -1071,6 +1074,55 @@ function autofillDraftJSEditor(editor, text) {
       typeNextToken();
     }, isAlreadyEmpty ? 0 : 30);
   }, 30);
+}
+
+// Abuse prevention: Extract logged-in LinkedIn profile identifier/vanity slug
+function getLinkedInUserIdentifier() {
+  try {
+    // 1. Check global navigation "me" avatar anchor
+    const meAnchor = document.querySelector('a.global-nav__me-link, .global-nav__me-photo, a[href*="/in/"].global-nav__primary-link, .feed-identity-module a[href*="/in/"]');
+    const targetAnchor = meAnchor ? (meAnchor.closest('a') || meAnchor) : null;
+    if (targetAnchor && targetAnchor.href) {
+      const match = targetAnchor.href.match(/\/in\/([^\/\?#]+)/);
+      if (match && match[1]) {
+        return match[1].toLowerCase().trim();
+      }
+    }
+
+    // 2. Check left side feed profile module link
+    const moduleAnchor = document.querySelector('.feed-identity-module__actor-meta a[href*="/in/"], .feed-identity-module a[href*="/in/"]');
+    if (moduleAnchor && moduleAnchor.href) {
+      const match = moduleAnchor.href.match(/\/in\/([^\/\?#]+)/);
+      if (match && match[1]) {
+        return match[1].toLowerCase().trim();
+      }
+    }
+
+    // 3. Search all /in/ links for profile slug
+    const inAnchors = document.querySelectorAll('a[href*="/in/"]');
+    for (const a of inAnchors) {
+      if (a.href) {
+        const match = a.href.match(/\/in\/([^\/\?#]+)/);
+        if (match && match[1]) {
+          const slug = match[1].toLowerCase().trim();
+          if (!['feed', 'mynetwork', 'jobs', 'messaging', 'notifications', 'analytics', 'settings', 'search'].includes(slug)) {
+            return slug;
+          }
+        }
+      }
+    }
+
+    // 4. Fallback to window pathname if on profile page
+    if (window.location.pathname.startsWith('/in/')) {
+      const match = window.location.pathname.match(/\/in\/([^\/\?#]+)/);
+      if (match && match[1]) {
+        return match[1].toLowerCase().trim();
+      }
+    }
+  } catch (err) {
+    console.warn("Eloquix: Error capturing LinkedIn profile identifier", err);
+  }
+  return null;
 }
 
 // Start helper to wait for page to settle and hydrate before running init

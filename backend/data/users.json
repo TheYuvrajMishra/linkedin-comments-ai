@@ -4,8 +4,8 @@
     "email": "",
     "plan": "free",
     "status": "active",
-    "lastResetDate": "2026-08-16",
-    "commentsGeneratedToday": 2,
+    "lastResetDate": "2026-08-17",
+    "commentsGeneratedToday": 0,
     "dailyLimit": 2,
     "createdAt": "2026-08-16T15:14:15.120Z"
   },
@@ -14,8 +14,8 @@
     "email": "yuvraj17mishra11@gmail.com",
     "plan": "free",
     "status": "active",
-    "lastResetDate": "2026-08-16",
-    "commentsGeneratedToday": 2,
+    "lastResetDate": "2026-08-17",
+    "commentsGeneratedToday": 0,
     "dailyLimit": 2,
     "createdAt": "2026-08-16T16:16:49.185Z"
   },
@@ -28,5 +28,15 @@
     "commentsGeneratedToday": 0,
     "dailyLimit": 2,
     "createdAt": "2026-08-17T04:00:42.603Z"
+  },
+  "TDPocXto4vZfj2X71ACNl8EWV4u1": {
+    "uid": "TDPocXto4vZfj2X71ACNl8EWV4u1",
+    "email": "messisingh1706@gmail.com",
+    "plan": "free",
+    "status": "active",
+    "lastResetDate": "2026-08-17",
+    "commentsGeneratedToday": 0,
+    "dailyLimit": 2,
+    "createdAt": "2026-08-17T06:17:05.807Z"
   }
 }

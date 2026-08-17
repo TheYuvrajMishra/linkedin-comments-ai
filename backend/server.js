@@ -32,6 +32,7 @@ const commentCache = new Map();
 const userSchema = new mongoose.Schema({
   uid: { type: String, required: true, unique: true, index: true },
   email: { type: String, default: "" },
+  linkedInIdentifier: { type: String, default: "", index: true },
   plan: { type: String, default: "free", enum: ["free", "pro", "ultra"] },
   status: { type: String, default: "active" },
   lastResetDate: { type: String, required: true },
@@ -94,8 +95,9 @@ function getTodayString() {
 // ----------------------------------------------------
 // UNIFIED USER DB DATA ACCESS LAYER
 // ----------------------------------------------------
-async function getUserRecord(userId, email = "") {
+async function getUserRecord(userId, email = "", linkedInIdentifier = "") {
   const today = getTodayString();
+  const cleanLinkedInId = (linkedInIdentifier || "").trim().toLowerCase();
 
   // 1. Try MongoDB Cloud Database first
   if (isMongoConnected) {
@@ -105,22 +107,31 @@ async function getUserRecord(userId, email = "") {
         user = await User.create({
           uid: userId,
           email: email,
+          linkedInIdentifier: cleanLinkedInId,
           plan: "free",
           status: "active",
           lastResetDate: today,
           commentsGeneratedToday: 0,
           dailyLimit: PLAN_LIMITS.free
         });
-      } else if (email && !user.email) {
-        user.email = email;
-        await user.save();
-      }
-
-      // Auto-reset daily quota if new day
-      if (user.lastResetDate !== today) {
-        user.commentsGeneratedToday = 0;
-        user.lastResetDate = today;
-        await user.save();
+      } else {
+        let modified = false;
+        if (email && !user.email) {
+          user.email = email;
+          modified = true;
+        }
+        if (cleanLinkedInId && user.linkedInIdentifier !== cleanLinkedInId) {
+          user.linkedInIdentifier = cleanLinkedInId;
+          modified = true;
+        }
+        if (user.lastResetDate !== today) {
+          user.commentsGeneratedToday = 0;
+          user.lastResetDate = today;
+          modified = true;
+        }
+        if (modified) {
+          await user.save();
+        }
       }
 
       user.dailyLimit = PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
@@ -136,6 +147,7 @@ async function getUserRecord(userId, email = "") {
     users[userId] = {
       uid: userId,
       email: email,
+      linkedInIdentifier: cleanLinkedInId,
       plan: "free",
       status: "active",
       lastResetDate: today,
@@ -147,6 +159,10 @@ async function getUserRecord(userId, email = "") {
   }
 
   const user = users[userId];
+  if (cleanLinkedInId && user.linkedInIdentifier !== cleanLinkedInId) {
+    user.linkedInIdentifier = cleanLinkedInId;
+    saveLocalUsers(users);
+  }
   if (user.lastResetDate !== today) {
     user.commentsGeneratedToday = 0;
     user.lastResetDate = today;
@@ -157,8 +173,77 @@ async function getUserRecord(userId, email = "") {
   return user;
 }
 
-async function incrementUserQuota(userId) {
+// Abuse Prevention: Calculate shared comment quota usage across all app accounts tied to a single LinkedIn profile
+async function getSharedQuotaUsage(userId, linkedInIdentifier = "") {
   const today = getTodayString();
+  const cleanLinkedInId = (linkedInIdentifier || "").trim().toLowerCase();
+
+  if (!cleanLinkedInId) {
+    const user = await getUserRecord(userId);
+    const limit = user.dailyLimit || PLAN_LIMITS[user.plan] || PLAN_LIMITS.free;
+    return {
+      usedToday: user.commentsGeneratedToday || 0,
+      effectiveLimit: limit,
+      isShared: false
+    };
+  }
+
+  // 1. Try MongoDB Cloud Database
+  if (isMongoConnected) {
+    try {
+      const linkedUsers = await User.find({ linkedInIdentifier: cleanLinkedInId });
+      let totalUsedToday = 0;
+      let highestLimit = PLAN_LIMITS.free;
+
+      for (const u of linkedUsers) {
+        const planLimit = PLAN_LIMITS[u.plan] || PLAN_LIMITS.free;
+        if (planLimit > highestLimit) {
+          highestLimit = planLimit;
+        }
+        if (u.lastResetDate === today) {
+          totalUsedToday += (u.commentsGeneratedToday || 0);
+        }
+      }
+
+      return {
+        usedToday: totalUsedToday,
+        effectiveLimit: highestLimit,
+        isShared: linkedUsers.length > 1
+      };
+    } catch (err) {
+      console.error("MongoDB getSharedQuotaUsage error:", err.message);
+    }
+  }
+
+  // 2. Fallback to Local JSON DB File
+  const users = loadLocalUsers();
+  let totalUsedToday = 0;
+  let highestLimit = PLAN_LIMITS.free;
+  let sharedCount = 0;
+
+  Object.values(users).forEach(u => {
+    if (u.linkedInIdentifier && u.linkedInIdentifier.toLowerCase() === cleanLinkedInId) {
+      sharedCount++;
+      const planLimit = PLAN_LIMITS[u.plan] || PLAN_LIMITS.free;
+      if (planLimit > highestLimit) {
+        highestLimit = planLimit;
+      }
+      if (u.lastResetDate === today) {
+        totalUsedToday += (u.commentsGeneratedToday || 0);
+      }
+    }
+  });
+
+  return {
+    usedToday: totalUsedToday,
+    effectiveLimit: highestLimit,
+    isShared: sharedCount > 1
+  };
+}
+
+async function incrementUserQuota(userId, linkedInIdentifier = "") {
+  const today = getTodayString();
+  const cleanLinkedInId = (linkedInIdentifier || "").trim().toLowerCase();
 
   // 1. Try MongoDB Cloud Database first
   if (isMongoConnected) {
@@ -167,12 +252,17 @@ async function incrementUserQuota(userId) {
       if (!user) {
         user = await User.create({
           uid: userId,
+          linkedInIdentifier: cleanLinkedInId,
           plan: "free",
           status: "active",
           lastResetDate: today,
           commentsGeneratedToday: 0,
           dailyLimit: PLAN_LIMITS.free
         });
+      }
+
+      if (cleanLinkedInId && user.linkedInIdentifier !== cleanLinkedInId) {
+        user.linkedInIdentifier = cleanLinkedInId;
       }
 
       if (user.lastResetDate !== today) {
@@ -183,9 +273,10 @@ async function incrementUserQuota(userId) {
       user.commentsGeneratedToday += 1;
       await user.save();
 
+      const sharedUsage = await getSharedQuotaUsage(userId, user.linkedInIdentifier);
       return {
-        used: user.commentsGeneratedToday,
-        limit: user.dailyLimit || PLAN_LIMITS[user.plan] || PLAN_LIMITS.free,
+        used: sharedUsage.usedToday,
+        limit: sharedUsage.effectiveLimit,
         plan: user.plan
       };
     } catch (err) {
@@ -196,11 +287,14 @@ async function incrementUserQuota(userId) {
   // 2. Fallback to Local JSON DB File
   const users = loadLocalUsers();
   if (!users[userId]) {
-    await getUserRecord(userId);
-    return incrementUserQuota(userId);
+    await getUserRecord(userId, "", cleanLinkedInId);
+    return incrementUserQuota(userId, cleanLinkedInId);
   }
 
   const user = users[userId];
+  if (cleanLinkedInId && user.linkedInIdentifier !== cleanLinkedInId) {
+    user.linkedInIdentifier = cleanLinkedInId;
+  }
   if (user.lastResetDate !== today) {
     user.commentsGeneratedToday = 0;
     user.lastResetDate = today;
@@ -209,9 +303,10 @@ async function incrementUserQuota(userId) {
   user.commentsGeneratedToday += 1;
   saveLocalUsers(users);
 
+  const sharedUsage = await getSharedQuotaUsage(userId, user.linkedInIdentifier);
   return {
-    used: user.commentsGeneratedToday,
-    limit: user.dailyLimit || PLAN_LIMITS[user.plan] || PLAN_LIMITS.free,
+    used: sharedUsage.usedToday,
+    limit: sharedUsage.effectiveLimit,
     plan: user.plan
   };
 }
@@ -279,18 +374,20 @@ app.get("/", healthHandler);
 // 2. Auth Verification & User Profile Retrieval
 app.post("/api/v1/auth/verify", async (req, res) => {
   try {
-    const { uid, email } = req.body || {};
+    const { uid, email, linkedInIdentifier } = req.body || {};
     const userId = uid || "guest_user";
-    const userProfile = await getUserRecord(userId, email);
+    const userProfile = await getUserRecord(userId, email, linkedInIdentifier);
+    const sharedUsage = await getSharedQuotaUsage(userId, userProfile.linkedInIdentifier);
 
     return res.json({
       success: true,
       profile: {
         uid: userProfile.uid,
         email: userProfile.email,
+        linkedInIdentifier: userProfile.linkedInIdentifier || "",
         plan: userProfile.plan,
-        commentsGeneratedToday: userProfile.commentsGeneratedToday,
-        dailyLimit: userProfile.dailyLimit
+        commentsGeneratedToday: sharedUsage.usedToday,
+        dailyLimit: sharedUsage.effectiveLimit
       }
     });
   } catch (err) {
@@ -304,15 +401,17 @@ app.get("/api/v1/user/profile", async (req, res) => {
   try {
     const userId = req.query.uid || req.headers["x-user-id"] || "guest_user";
     const userProfile = await getUserRecord(userId);
+    const sharedUsage = await getSharedQuotaUsage(userId, userProfile.linkedInIdentifier);
 
     return res.json({
       success: true,
       profile: {
         uid: userProfile.uid,
         email: userProfile.email,
+        linkedInIdentifier: userProfile.linkedInIdentifier || "",
         plan: userProfile.plan,
-        commentsGeneratedToday: userProfile.commentsGeneratedToday,
-        dailyLimit: userProfile.dailyLimit
+        commentsGeneratedToday: sharedUsage.usedToday,
+        dailyLimit: sharedUsage.effectiveLimit
       }
     });
   } catch (err) {
@@ -323,7 +422,7 @@ app.get("/api/v1/user/profile", async (req, res) => {
 // 4. AI Comment Generation Endpoint (Backend Groq API Proxy)
 app.post("/api/v1/comments/generate", async (req, res) => {
   try {
-    const { postText, tone = "insightful", customInstructions = "", regenerate = false, uid } = req.body || {};
+    const { postText, tone = "insightful", customInstructions = "", regenerate = false, uid, linkedInIdentifier } = req.body || {};
 
     const groqApiKey = process.env.GROQ_API_KEY;
     if (!groqApiKey || groqApiKey === "gsk_your_groq_api_key_here") {
@@ -335,27 +434,31 @@ app.post("/api/v1/comments/generate", async (req, res) => {
 
     const userId = uid || "guest_user";
 
-    // A. Check user daily quota limit
-    const userProfile = await getUserRecord(userId);
-    const limit = userProfile.dailyLimit || PLAN_LIMITS[userProfile.plan] || PLAN_LIMITS.free;
+    // A. Update user record & capture linkedInIdentifier
+    const userProfile = await getUserRecord(userId, "", linkedInIdentifier);
+    const activeLinkedInId = userProfile.linkedInIdentifier || (linkedInIdentifier || "").trim().toLowerCase();
 
-    if (userProfile.commentsGeneratedToday >= limit) {
+    // B. Check shared quota usage across all app accounts tied to this LinkedIn profile identity
+    const usageInfo = await getSharedQuotaUsage(userId, activeLinkedInId);
+
+    if (usageInfo.usedToday >= usageInfo.effectiveLimit) {
+      const idLabel = activeLinkedInId ? `'${activeLinkedInId}'` : "this profile";
       return res.status(429).json({
         success: false,
-        error: `Daily limit reached (${userProfile.commentsGeneratedToday}/${limit} generated today). Upgrade your plan to get more AI comments!`,
+        error: `Daily limit reached (${usageInfo.usedToday}/${usageInfo.effectiveLimit} generated today for LinkedIn profile ${idLabel} across linked accounts). Upgrade your plan to get more AI comments!`,
         usage: {
-          used: userProfile.commentsGeneratedToday,
-          limit: limit,
+          used: usageInfo.usedToday,
+          limit: usageInfo.effectiveLimit,
           plan: userProfile.plan
         }
       });
     }
 
-    // B. Sanitize inputs to shield against prompt injection
+    // C. Sanitize inputs to shield against prompt injection
     const sanitizedPostText = (postText || "").replace(/"""/g, '"');
     const sanitizedCustomInstructions = customInstructions ? customInstructions.replace(/"""/g, '"') : "";
 
-    // C. Check memory cache
+    // D. Check memory cache
     const cacheKey = `${hashString(sanitizedPostText)}_${tone}_${hashString(sanitizedCustomInstructions)}`;
     if (regenerate) {
       commentCache.delete(cacheKey);
@@ -366,8 +469,8 @@ app.post("/api/v1/comments/generate", async (req, res) => {
         success: true,
         comment: cachedComment,
         usage: {
-          used: userProfile.commentsGeneratedToday,
-          limit: limit,
+          used: usageInfo.usedToday,
+          limit: usageInfo.effectiveLimit,
           plan: userProfile.plan
         },
         cached: true
@@ -461,7 +564,7 @@ ${sanitizedCustomInstructions ? `\nAdditional Context/Instructions for the Comme
 
     // F. Store in cache & increment user daily usage count
     commentCache.set(cacheKey, comment);
-    const updatedUsage = await incrementUserQuota(userId);
+    const updatedUsage = await incrementUserQuota(userId, activeLinkedInId);
 
     return res.json({
       success: true,
