@@ -31,14 +31,6 @@ function GridSection({ children, className = "", id }) {
         <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
         <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
 
-        {/* Absolute Intersection Cross-Ticks */}
-        <span className="absolute -top-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">
-          +
-        </span>
-        <span className="absolute -top-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">
-          +
-        </span>
-
         {children}
       </div>
     </div>
@@ -167,7 +159,7 @@ export default function ExtensionPage() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-[#050505] text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden font-sans">
+    <div className="relative min-h-[100dvh] bg-black text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden font-sans">
       {/* Aceternity Background Beams */}
       <BackgroundBeams className="pointer-events-none opacity-30 z-0" />
 
@@ -176,12 +168,10 @@ export default function ExtensionPage() {
         <div className="w-full relative">
           
           {/* Header Section */}
-          <div className="relative w-full border-b border-white/10 bg-[#050505]/80 backdrop-blur-md">
+          <div className="relative w-full border-b border-white/10 bg-black/90 backdrop-blur-md">
             <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-4">
               <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
               <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
-              <span className="absolute -top-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
-              <span className="absolute -top-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
               <Navbar />
             </div>
           </div>
@@ -193,7 +183,7 @@ export default function ExtensionPage() {
               <h1 className="relative z-10 text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 via-neutral-200 to-neutral-500 mb-4 leading-tight">
                 Extension Session & Account Center
               </h1>
-              <p className="text-sm sm:text-base font-mono text-zinc-400 max-w-2xl leading-relaxed">
+              <p className="text-sm sm:text-base font-mono text-neutral-400 max-w-2xl leading-relaxed">
                 Single source of truth for Eloquix Chrome Extension authentication. Logging in here automatically authenticates your browser extension in real time.
               </p>
             </GridSection>
@@ -202,9 +192,9 @@ export default function ExtensionPage() {
             {gateNotice && !user && (
               <div className="w-full border-b border-white/10">
                 <div className="max-w-7xl mx-auto px-6 sm:px-12 py-4">
-                  <div className="p-4 bg-zinc-950 border border-white/15 rounded-2xl text-xs font-mono text-zinc-200 flex justify-between items-center">
+                  <div className="p-4 bg-black border border-white/15 rounded-2xl text-xs font-mono text-neutral-200 flex justify-between items-center">
                     <span>{gateNotice}</span>
-                    <button onClick={() => setGateNotice('')} className="text-zinc-500 hover:text-white uppercase tracking-wider ml-4">
+                    <button onClick={() => setGateNotice('')} className="text-neutral-500 hover:text-white uppercase tracking-wider ml-4">
                       Dismiss
                     </button>
                   </div>
@@ -214,10 +204,10 @@ export default function ExtensionPage() {
 
             {/* Auth Card Section */}
             <GridSection id="auth-section">
-              <div className="bg-white/[0.03] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
-                <div className="bg-zinc-950/90 border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-6 md:p-10">
+              <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
+                <div className="bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-6 md:p-10">
                   {loading ? (
-                    <div className="py-8 text-center text-xs font-mono text-zinc-500 uppercase tracking-widest">
+                    <div className="py-8 text-center text-xs font-mono text-neutral-500 uppercase tracking-widest">
                       Checking active session...
                     </div>
                   ) : user ? (
@@ -225,18 +215,18 @@ export default function ExtensionPage() {
                     <div>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 mb-6 border-b border-white/10 gap-4">
                         <div>
-                          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-500 block mb-1">
+                          <span className="text-[10px] font-mono uppercase tracking-[0.2em] text-neutral-500 block mb-1">
                             Authenticated Account
                           </span>
                           <span className="text-xl font-bold text-white font-mono">{user.email}</span>
                         </div>
-                        <span className="self-start sm:self-auto px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] text-zinc-300">
+                        <span className="self-start sm:self-auto px-3 py-1 bg-white/5 border border-white/10 rounded-full text-[10px] font-mono uppercase tracking-[0.2em] text-neutral-300">
                           {(userProfile?.plan || 'free').toUpperCase()} PLAN
                         </span>
                       </div>
 
-                      <div className="p-6 bg-white/[0.02] border border-white/5 rounded-2xl mb-8">
-                        <span className="text-[10px] font-mono text-zinc-500 block mb-1 uppercase tracking-widest">
+                      <div className="p-6 bg-[#050505] border border-white/5 rounded-2xl mb-8">
+                        <span className="text-[10px] font-mono text-neutral-500 block mb-1 uppercase tracking-widest">
                           Daily Generation Quota
                         </span>
                         <span className="text-base font-mono text-white font-bold">
@@ -245,7 +235,7 @@ export default function ExtensionPage() {
                       </div>
 
                       <div className="flex items-center justify-between pt-2">
-                        <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+                        <div className="flex items-center gap-2 text-xs font-mono text-neutral-400">
                           <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
                           <span>Extension Synced & Active</span>
                         </div>
@@ -262,23 +252,23 @@ export default function ExtensionPage() {
                     <div>
                       <div className="mb-8">
                         <h3 className="relative z-10 text-xl font-sans font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400 mb-2">Google Single Sign-On</h3>
-                        <p className="text-xs text-zinc-400 font-mono leading-relaxed max-w-md">
+                        <p className="text-xs text-neutral-400 font-mono leading-relaxed max-w-md">
                           Sign in using your Google Account to authorize your extension session and activate daily AI comment quotas.
                         </p>
                       </div>
 
                       {authError && (
-                        <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-zinc-300">
+                        <div className="mb-6 p-4 bg-white/5 border border-white/10 rounded-xl text-xs font-mono text-neutral-300">
                           {authError}
                         </div>
                       )}
 
                       {/* Double-Bezel Button-in-Button Google Auth Pill */}
-                      <div className="p-1 rounded-[2.2rem] bg-white/10 border border-white/15 max-w-md">
+                      <div className="p-1 rounded-[2.2rem] bg-neutral-900 border border-white/15 max-w-md">
                         <button
                           onClick={handleGoogleAuth}
                           disabled={authSubmitting}
-                          className="group w-full rounded-[calc(2.2rem-0.25rem)] px-7 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-zinc-200 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
+                          className="group w-full rounded-[calc(2.2rem-0.25rem)] px-7 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between gap-4 hover:bg-neutral-200 active:scale-[0.98] transition-all duration-300 disabled:opacity-50"
                         >
                           <div className="flex items-center gap-3">
                             <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current">
@@ -304,7 +294,7 @@ export default function ExtensionPage() {
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                   <h3 className="relative z-10 text-2xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400">Subscription Tier Selection</h3>
-                  <p className="text-xs font-mono text-zinc-400 mt-1">
+                  <p className="text-xs font-mono text-neutral-400 mt-1">
                     Gated purchase &bull; Authentication required before upgrading.
                   </p>
                 </div>
@@ -314,7 +304,7 @@ export default function ExtensionPage() {
                   <button
                     onClick={() => setCurrency('inr')}
                     className={`px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                      currency === 'inr' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'
+                      currency === 'inr' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
                     }`}
                   >
                     INR (₹)
@@ -322,7 +312,7 @@ export default function ExtensionPage() {
                   <button
                     onClick={() => setCurrency('usd')}
                     className={`px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                      currency === 'usd' ? 'bg-white text-black font-bold' : 'text-zinc-400 hover:text-white'
+                      currency === 'usd' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
                     }`}
                   >
                     USD ($)
@@ -332,30 +322,30 @@ export default function ExtensionPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Pro Plan - Double Bezel */}
-                <div className="bg-white/[0.03] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
-                  <div className="bg-zinc-950/90 border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 h-full flex flex-col justify-between">
+                <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
+                  <div className="bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 h-full flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-xl font-bold text-white">Pro Plan</h4>
-                        <span className="text-[10px] font-mono text-zinc-400 border border-white/10 px-2.5 py-1 rounded-full bg-white/5">
+                        <span className="text-[10px] font-mono text-neutral-400 border border-white/10 px-2.5 py-1 rounded-full bg-white/5">
                           20 COMMENTS/DAY
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-white font-mono mb-6">
-                        {currency === 'inr' ? '₹49' : '$4.99'} <span className="text-xs font-normal text-zinc-500">/ month</span>
+                        {currency === 'inr' ? '₹49' : '$4.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
                       </div>
-                      <ul className="space-y-3 mb-8 text-xs text-zinc-300 font-mono">
+                      <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> 20 AI comments per day
+                          <span className="text-neutral-500">—</span> 20 AI comments per day
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> All 5 comment tones
+                          <span className="text-neutral-500">—</span> All 5 comment tones
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> Custom writing style persona
+                          <span className="text-neutral-500">—</span> Custom writing style persona
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> Priority Groq API speed
+                          <span className="text-neutral-500">—</span> Priority Groq API speed
                         </li>
                       </ul>
                     </div>
@@ -364,14 +354,14 @@ export default function ExtensionPage() {
                       {!user ? (
                         <button
                           onClick={() => handleSubscriptionClick('pro')}
-                          className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
+                          className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
                         >
                           Log In to Subscribe
                         </button>
                       ) : (
                         <button
                           onClick={() => handleSubscriptionClick('pro')}
-                          className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-zinc-200 active:scale-[0.98] transition-all"
+                          className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all"
                         >
                           <span>Upgrade Pro ({currency === 'inr' ? '₹49/mo' : '$4.99/mo'})</span>
                           <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
@@ -386,30 +376,30 @@ export default function ExtensionPage() {
                 </div>
 
                 {/* Ultra Plan - Double Bezel */}
-                <div className="bg-white/[0.03] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
-                  <div className="bg-zinc-950/90 border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 h-full flex flex-col justify-between">
+                <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
+                  <div className="bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 h-full flex flex-col justify-between">
                     <div>
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-xl font-bold text-white">Ultra Plan</h4>
-                        <span className="text-[10px] font-mono text-zinc-400 border border-white/10 px-2.5 py-1 rounded-full bg-white/5">
+                        <span className="text-[10px] font-mono text-neutral-400 border border-white/10 px-2.5 py-1 rounded-full bg-white/5">
                           50 COMMENTS/DAY
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-white font-mono mb-6">
-                        {currency === 'inr' ? '₹99' : '$7.99'} <span className="text-xs font-normal text-zinc-500">/ month</span>
+                        {currency === 'inr' ? '₹99' : '$7.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
                       </div>
-                      <ul className="space-y-3 mb-8 text-xs text-zinc-300 font-mono">
+                      <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> 50 AI comments per day
+                          <span className="text-neutral-500">—</span> 50 AI comments per day
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> Priority server queueing
+                          <span className="text-neutral-500">—</span> Priority server queueing
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> Unlimited comment regenerations
+                          <span className="text-neutral-500">—</span> Unlimited comment regenerations
                         </li>
                         <li className="flex items-center gap-2">
-                          <span className="text-zinc-500">—</span> Dedicated support access
+                          <span className="text-neutral-500">—</span> Dedicated support access
                         </li>
                       </ul>
                     </div>
@@ -418,14 +408,14 @@ export default function ExtensionPage() {
                       {!user ? (
                         <button
                           onClick={() => handleSubscriptionClick('ultra')}
-                          className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
+                          className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
                         >
                           Log In to Subscribe
                         </button>
                       ) : (
                         <button
                           onClick={() => handleSubscriptionClick('ultra')}
-                          className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-zinc-200 active:scale-[0.98] transition-all"
+                          className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all"
                         >
                           <span>Upgrade Ultra ({currency === 'inr' ? '₹99/mo' : '$7.99/mo'})</span>
                           <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
@@ -444,16 +434,12 @@ export default function ExtensionPage() {
 
           {/* Footer Section */}
           <div className="relative w-full border-b border-white/10">
-            <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-8 text-xs font-mono text-zinc-600 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="max-w-7xl mx-auto px-6 sm:px-12 relative py-8 text-xs font-mono text-neutral-600 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
               <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
-              <span className="absolute -top-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
-              <span className="absolute -top-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
-              <span className="absolute -bottom-[7px] -left-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
-              <span className="absolute -bottom-[7px] -right-[6px] text-[12px] font-mono text-zinc-500 z-20 pointer-events-none select-none">+</span>
 
               <div>Eloquix Portal (/extension) &bull; Full-Bleed Structural Intersections</div>
-              <Link to="/" className="text-zinc-400 hover:text-white transition-colors">
+              <Link to="/" className="text-neutral-400 hover:text-white transition-colors">
                 &larr; Back to Overview
               </Link>
             </div>
