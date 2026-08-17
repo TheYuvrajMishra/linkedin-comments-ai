@@ -4,6 +4,8 @@
 User-agent: *
 Allow: /
 Allow: /extension
+Allow: /terms
+Allow: /privacy
 
 # Disallow API proxy endpoints and internal assets
 Disallow: /api/

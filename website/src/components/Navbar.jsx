@@ -17,11 +17,12 @@ export default function Navbar() {
     <nav className="w-full py-2 flex items-center justify-between">
       {/* Brand Logo */}
       <Link to="/" className="flex items-center gap-3 group">
-        <div className="w-8 h-8 rounded-full flex items-center justify-center transition-colors">
+        <div className="flex items-center justify-center">
           <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12 3c.132 0 .263 0 .393.007a7.5 7.5 0 0 0 7.92 7.92c.11.002.22.003.33.003a.75.75 0 0 1 0 1.5c-.11 0-.22 0-.33.003a7.5 7.5 0 0 0-7.92 7.92c-.007.13-.007.261-.007.391a.75.75 0 0 1-1.5 0c0-.13 0-.261-.007-.391a7.5 7.5 0 0 0-7.92-7.92C2.86 12.44 2.75 12.43 2.64 12.43a.75.75 0 0 1 0-1.5c.11 0 .22-.001.33-.003a7.5 7.5 0 0 0 7.92-7.92C10.9 3.004 11.03 3 11.16 3a.75.75 0 0 1 .84 0Z"/>
           </svg>
         </div>
+
         <div>
           <span className="text-sm font-bold tracking-tight text-white block leading-none">Quick Comment AI</span>
           <span className="text-[10px] font-mono text-zinc-500">AI Companion</span>
