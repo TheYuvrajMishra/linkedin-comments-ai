@@ -11,7 +11,7 @@ dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-const FRONTEND_URL = process.env.FRONTEND_URL || "https://linkedin-comments-ai.vercel.app";
+const FRONTEND_URL = process.env.FRONTEND_URL || "https://quickcommentai.yuvrajmishra.online";
 
 // Middleware - Configure CORS to support Chrome Extensions & Vercel Web App
 app.use(cors({

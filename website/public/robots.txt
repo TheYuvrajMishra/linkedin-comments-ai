@@ -1,5 +1,5 @@
 # Quick Comment AI - Robots File
-# https://quickcommentai.com
+# https://quickcommentai.yuvrajmishra.online
 
 User-agent: *
 Allow: /
@@ -14,4 +14,4 @@ Disallow: /static/
 Crawl-delay: 1
 
 # Sitemap Location
-Sitemap: https://quickcommentai.com/sitemap.xml
+Sitemap: https://quickcommentai.yuvrajmishra.online/sitemap.xml
