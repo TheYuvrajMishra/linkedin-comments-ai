@@ -42,6 +42,7 @@ const mergedEnv = {
 };
 
 export default defineConfig({
+  envDir: path.resolve(__dirname, '../'),
   plugins: [
     react(),
     tailwindcss()
@@ -52,6 +53,24 @@ export default defineConfig({
     }
   },
   define: {
+    'process.env.FIREBASE_API_KEY': JSON.stringify(mergedEnv.FIREBASE_API_KEY),
+    'process.env.FIREBASE_AUTH_DOMAIN': JSON.stringify(mergedEnv.FIREBASE_AUTH_DOMAIN),
+    'process.env.FIREBASE_PROJECT_ID': JSON.stringify(mergedEnv.FIREBASE_PROJECT_ID),
+    'process.env.FIREBASE_STORAGE_BUCKET': JSON.stringify(mergedEnv.FIREBASE_STORAGE_BUCKET),
+    'process.env.FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(mergedEnv.FIREBASE_MESSAGING_SENDER_ID),
+    'process.env.FIREBASE_APP_ID': JSON.stringify(mergedEnv.FIREBASE_APP_ID),
+    'process.env.FIREBASE_MEASUREMENT_ID': JSON.stringify(mergedEnv.FIREBASE_MEASUREMENT_ID),
+    'process.env.BACKEND_URL': JSON.stringify(mergedEnv.BACKEND_URL),
+
+    'import.meta.env.VITE_FIREBASE_API_KEY': JSON.stringify(mergedEnv.FIREBASE_API_KEY),
+    'import.meta.env.VITE_FIREBASE_AUTH_DOMAIN': JSON.stringify(mergedEnv.FIREBASE_AUTH_DOMAIN),
+    'import.meta.env.VITE_FIREBASE_PROJECT_ID': JSON.stringify(mergedEnv.FIREBASE_PROJECT_ID),
+    'import.meta.env.VITE_FIREBASE_STORAGE_BUCKET': JSON.stringify(mergedEnv.FIREBASE_STORAGE_BUCKET),
+    'import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID': JSON.stringify(mergedEnv.FIREBASE_MESSAGING_SENDER_ID),
+    'import.meta.env.VITE_FIREBASE_APP_ID': JSON.stringify(mergedEnv.FIREBASE_APP_ID),
+    'import.meta.env.VITE_FIREBASE_MEASUREMENT_ID': JSON.stringify(mergedEnv.FIREBASE_MEASUREMENT_ID),
+    'import.meta.env.VITE_BACKEND_URL': JSON.stringify(mergedEnv.BACKEND_URL),
+
     'process.env': JSON.stringify(mergedEnv)
   },
   server: {
