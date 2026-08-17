@@ -15,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   const webAuthBtn = document.getElementById("webAuthBtn");
   const webAuthBtnText = document.getElementById("webAuthBtnText");
-  const logoutBtn = document.getElementById("logoutBtn");
 
   const activeWebsiteUrl = (typeof WEBSITE_URL !== "undefined" ? WEBSITE_URL : "http://localhost:5173");
   const activeBackendUrl = (typeof BACKEND_URL !== "undefined" ? BACKEND_URL : "http://localhost:5000");
@@ -60,7 +59,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (userAuth && userAuth.uid && userAuth.email) {
     userEmail.textContent = userAuth.email;
     if (webAuthBtnText) webAuthBtnText.textContent = "Manage Account on Website";
-    if (logoutBtn) logoutBtn.style.display = "inline-block";
 
     try {
       const profile = await getUserProfile(userAuth.uid, userAuth.idToken);
@@ -72,7 +70,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     userEmail.textContent = "Not Authenticated";
     planPill.textContent = "FREE PLAN";
     if (webAuthBtnText) webAuthBtnText.textContent = "Log In on Companion Site";
-    if (logoutBtn) logoutBtn.style.display = "none";
 
     try {
       const profile = await getUserProfile("guest_user");
@@ -118,10 +115,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Open Companion Auth Center Website
+  // Open Companion Auth Center Website at /extension route
   if (webAuthBtn) {
     webAuthBtn.addEventListener("click", () => {
-      chrome.tabs.create({ url: activeWebsiteUrl });
+      chrome.tabs.create({ url: activeWebsiteUrl + "/extension" });
     });
   }
 
@@ -157,12 +154,4 @@ document.addEventListener("DOMContentLoaded", async () => {
       alert("Failed to save settings. Please try again.");
     }
   });
-
-  // Sign out handler
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", async () => {
-      await chrome.storage.local.remove("userAuth");
-      window.location.reload();
-    });
-  }
 });
