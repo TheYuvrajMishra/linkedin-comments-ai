@@ -7,6 +7,14 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# Environment & Secrets (Ignore ALL .env, .env.*, .env.example, and env variants anywhere)
+.env
+.env.*
+*.env
+*.env*
+.env.example
+*.example
+
 node_modules
 dist
 dist-ssr
