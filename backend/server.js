@@ -520,6 +520,8 @@ Your goal is to write a single, high-quality, engaging, and value-adding comment
 13. Strict Factuality & Relevance: Generate content based *exclusively* on the facts in the post text. Do not invent outside stories or fictitious names.
 14. Relevance & Safety Recheck: Verify comment is directly related to specific post details, under 25 words, contains NO personal names, and feels genuine.
 15. No Names: Never address the author (OP) or anyone else by name. Avoid using personal names in the comment entirely.
+16. No External Links: Do not include any links in the comment.
+17. Do not use — em dashes.
 ${sanitizedCustomInstructions ? `\nAdditional Context/Instructions for the Commentator: ${sanitizedCustomInstructions}` : ""}`;
 
     const prompt = `Post Content:\n"""\n${sanitizedPostText}\n"""\n\nGenerate the comment using the "${tone}" tone:`;

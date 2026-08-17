@@ -65,17 +65,21 @@ linkedin-comments-ai/
 │   ├── vite.config.js         # Vite bundler configuration with environment resolution
 │   ├── package.json           # Frontend dependencies
 │   └── .env.example           # Frontend environment template
-├── content/                    # Chrome Extension Content Script
-│   ├── content.js             # LinkedIn DOM observer, overlay injector & identifier reader
-│   ├── content.css            # Extension Shadow DOM styles
-│   └── website-bridge.js      # Real-time web-portal authentication bridge
-├── popup/                      # Extension Settings Popup
-│   ├── popup.html             # Extension popup UI linking to web portal
-│   └── popup.js               # Extension popup logic
-├── background.js              # Service worker proxy forwarding requests to backend
-├── config.js                  # Shared extension configuration constants
-├── manifest.json              # Chrome Extension Manifest V3 file
-└── README.md                  # Project documentation
+├── extension/                  # Chrome Extension Source Files
+│   ├── manifest.json          # Chrome Extension Manifest V3 file
+│   ├── background.js          # Service worker proxy forwarding requests to backend
+│   ├── config.js              # Shared extension configuration constants
+│   ├── env-loader.js          # Environment helper script
+│   ├── firebase-db.js         # Firebase client DB wrapper
+│   ├── content/               # Extension Content Scripts
+│   │   ├── content.js         # LinkedIn DOM observer, overlay injector & identifier reader
+│   │   ├── content.css        # Extension Shadow DOM styles
+│   │   └── website-bridge.js  # Real-time web-portal authentication bridge
+│   ├── popup/                 # Extension Settings Popup
+│   │   ├── popup.html         # Extension popup UI linking to web portal
+│   │   └── popup.js           # Extension popup logic
+│   └── icons/                 # Extension icon assets
+├── README.md                  # Project documentation
 ```
 
 ---
@@ -126,7 +130,7 @@ npm run dev
 ### 3. Load Chrome Extension
 1. Open Chrome and navigate to `chrome://extensions/`.
 2. Enable **Developer mode** (top-right toggle).
-3. Click **Load unpacked** and select the project root directory `linkedin-comments-ai`.
+3. Click **Load unpacked** and select the `extension` directory inside `linkedin-comments-ai`.
 4. Open any LinkedIn post to experience the **✨ Generate AI** overlay!
 
 ---
