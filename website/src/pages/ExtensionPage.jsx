@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { BackgroundBeams } from '../components/ui/background-beams';
+import SideMarginPatterns from '../components/ui/side-margin-patterns';
 import {
   auth,
   googleProvider,
@@ -162,6 +163,9 @@ export default function ExtensionPage() {
 
   return (
     <div className="relative min-h-[100dvh] bg-black text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden font-sans">
+      {/* Structural Side Margin Line Patterns (Both Sides) */}
+      <SideMarginPatterns />
+
       {/* Aceternity Background Beams */}
       <BackgroundBeams className="pointer-events-none opacity-30 z-0" />
 
