@@ -3,26 +3,26 @@
 // Automatically syncs Firebase Auth state from companion website to extension chrome.storage.local
 
 (function() {
-  console.log("[Eloquix Extension Bridge] Loaded on companion site.");
+  console.log("[Quick Comment AI Extension Bridge] Loaded on companion site.");
 
   function syncSessionToExtension() {
     try {
-      const rawAuth = localStorage.getItem("eloquix_auth");
+      const rawAuth = localStorage.getItem("quick_comment_ai_auth") || localStorage.getItem("eloquix_auth");
       if (rawAuth) {
         const userAuth = JSON.parse(rawAuth);
         if (userAuth && userAuth.uid && userAuth.email) {
           chrome.storage.local.set({ userAuth }, () => {
-            console.log("[Eloquix Extension Bridge] Synced active session:", userAuth.email);
+            console.log("[Quick Comment AI Extension Bridge] Synced active session:", userAuth.email);
           });
           return;
         }
       }
       // If no valid auth in website localStorage, remove userAuth from extension storage
       chrome.storage.local.remove("userAuth", () => {
-        console.log("[Eloquix Extension Bridge] Cleared session (Logged Out).");
+        console.log("[Quick Comment AI Extension Bridge] Cleared session (Logged Out).");
       });
     } catch (e) {
-      console.error("[Eloquix Extension Bridge] Failed to sync localStorage session:", e);
+      console.error("[Quick Comment AI Extension Bridge] Failed to sync localStorage session:", e);
     }
   }
 
@@ -31,15 +31,15 @@
 
   // 2. Listen for postMessage from React app
   window.addEventListener("message", (event) => {
-    if (event.data && event.data.type === "ELOQUIX_AUTH_STATE") {
+    if (event.data && (event.data.type === "QUICK_COMMENT_AI_AUTH_STATE" || event.data.type === "ELOQUIX_AUTH_STATE")) {
       const userAuth = event.data.userAuth;
       if (userAuth && userAuth.uid && userAuth.email) {
         chrome.storage.local.set({ userAuth }, () => {
-          console.log("[Eloquix Extension Bridge] Received login event:", userAuth.email);
+          console.log("[Quick Comment AI Extension Bridge] Received login event:", userAuth.email);
         });
       } else {
         chrome.storage.local.remove("userAuth", () => {
-          console.log("[Eloquix Extension Bridge] Received logout event.");
+          console.log("[Quick Comment AI Extension Bridge] Received logout event.");
         });
       }
     }
@@ -47,7 +47,7 @@
 
   // 3. Listen for window storage changes (cross-tab sync)
   window.addEventListener("storage", (event) => {
-    if (event.key === "eloquix_auth") {
+    if (event.key === "quick_comment_ai_auth" || event.key === "eloquix_auth") {
       syncSessionToExtension();
     }
   });

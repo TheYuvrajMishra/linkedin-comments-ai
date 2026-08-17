@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Eloquix - LinkedIn AI Comment Generator",
+  "name": "Quick Comment AI - LinkedIn AI Comment Generator",
   "version": "1.0.0",
-  "description": "Generate premium, context-aware comments for LinkedIn posts using Eloquix Backend Server API.",
+  "description": "Generate sharp, context-aware AI comments for LinkedIn posts using Quick Comment AI.",
   "permissions": [
     "storage",
     "activeTab"

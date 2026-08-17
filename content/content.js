@@ -1,4 +1,4 @@
-// Content script for LinkedIn AI Comment Generator
+// Content script for Quick Comment AI
 
 const SPARKLE_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" style="display: inline-block; vertical-align: middle;"><path d="M12 3c.132 0 .263 0 .393.007a7.5 7.5 0 0 0 7.92 7.92c.11.002.22.003.33.003a.75.75 0 0 1 0 1.5c-.11 0-.22 0-.33.003a7.5 7.5 0 0 0-7.92 7.92c-.007.13-.007.261-.007.391a.75.75 0 0 1-1.5 0c0-.13 0-.261-.007-.391a7.5 7.5 0 0 0-7.92-7.92C2.86 12.44 2.75 12.43 2.64 12.43a.75.75 0 0 1 0-1.5c.11 0 .22-.001.33-.003a7.5 7.5 0 0 0 7.92-7.92C10.9 3.004 11.03 3 11.16 3a.75.75 0 0 1 .84 0Z"/></svg>`;
 const REGEN_SVG = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display: inline-block; vertical-align: middle;"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
@@ -14,7 +14,7 @@ const SHADOW_CSS = `
 ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 999px; }
 ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-.linkai-container {
+.quickcomment-container {
   display: inline-flex;
   align-items: center;
   position: relative;
@@ -23,7 +23,7 @@ const SHADOW_CSS = `
   vertical-align: middle;
 }
 
-.linkai-btn {
+.quickcomment-btn {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -42,21 +42,21 @@ const SHADOW_CSS = `
   white-space: nowrap;
 }
 
-.linkai-btn:hover:not(:disabled) {
+.quickcomment-btn:hover:not(:disabled) {
   color: #0f172a;
   background: rgba(0, 0, 0, 0.04);
 }
 
-:host-context([class*="theme--dark"]) .linkai-btn {
+:host-context([class*="theme--dark"]) .quickcomment-btn {
   color: #9ca3af;
 }
 
-:host-context([class*="theme--dark"]) .linkai-btn:hover:not(:disabled) {
+:host-context([class*="theme--dark"]) .quickcomment-btn:hover:not(:disabled) {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
 }
 
-.linkai-btn:disabled {
+.quickcomment-btn:disabled {
   color: #ccd0d5;
   cursor: not-allowed;
   background: transparent;
@@ -64,7 +64,7 @@ const SHADOW_CSS = `
   transform: none;
 }
 
-.linkai-btn-icon {
+.quickcomment-btn-icon {
   width: 13px;
   height: 13px;
   display: inline-flex;
@@ -73,11 +73,11 @@ const SHADOW_CSS = `
   transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
 }
 
-.linkai-btn:hover:not(:disabled) .linkai-btn-icon {
+.quickcomment-btn:hover:not(:disabled) .quickcomment-btn-icon {
   transform: rotate(15deg) scale(1.1);
 }
 
-.linkai-tone-trigger {
+.quickcomment-tone-trigger {
   background: transparent;
   border: none;
   color: #8e8e93;
@@ -95,21 +95,21 @@ const SHADOW_CSS = `
   white-space: nowrap;
 }
 
-:host-context([class*="theme--dark"]) .linkai-tone-trigger {
+:host-context([class*="theme--dark"]) .quickcomment-tone-trigger {
   color: #9ca3af;
 }
 
-.linkai-tone-trigger:hover {
+.quickcomment-tone-trigger:hover {
   color: #0f172a;
   background: rgba(0, 0, 0, 0.04);
 }
 
-:host-context([class*="theme--dark"]) .linkai-tone-trigger:hover {
+:host-context([class*="theme--dark"]) .quickcomment-tone-trigger:hover {
   color: #ffffff;
   background: rgba(255, 255, 255, 0.08);
 }
 
-.linkai-dropdown {
+.quickcomment-dropdown {
   position: absolute;
   bottom: 34px;
   left: 0;
@@ -128,11 +128,11 @@ const SHADOW_CSS = `
   animation: slideUp 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.linkai-dropdown.show {
+.quickcomment-dropdown.show {
   display: flex;
 }
 
-.linkai-item {
+.quickcomment-item {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -146,18 +146,18 @@ const SHADOW_CSS = `
   text-align: left;
 }
 
-.linkai-item:hover {
+.quickcomment-item:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #ffffff;
 }
 
-.linkai-item.selected {
+.quickcomment-item.selected {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
   font-weight: 600;
 }
 
-.linkai-status {
+.quickcomment-status {
   font-size: 11px;
   color: #6b7280;
   margin-left: 8px;
@@ -168,15 +168,15 @@ const SHADOW_CSS = `
   font-weight: 500;
 }
 
-.linkai-status.error {
+.quickcomment-status.error {
   color: #8e8e93 !important;
 }
 
-.linkai-status.success {
+.quickcomment-status.success {
   color: #ffffff !important;
 }
 
-.linkai-spinner {
+.quickcomment-spinner {
   width: 12px;
   height: 12px;
   border: 2px solid rgba(0, 0, 0, 0.15);
@@ -186,7 +186,7 @@ const SHADOW_CSS = `
   display: inline-block;
 }
 
-:host-context([class*="theme--dark"]) .linkai-spinner {
+:host-context([class*="theme--dark"]) .quickcomment-spinner {
   border-color: rgba(255, 255, 255, 0.15);
   border-top-color: #9ca3af;
 }
@@ -251,9 +251,9 @@ function cleanup() {
     closeActiveDropdownPortal();
   } catch (e) {}
   try {
-    document.querySelectorAll(".linkai-container").forEach(el => el.remove());
+    document.querySelectorAll(".quickcomment-container").forEach(el => el.remove());
   } catch (e) {}
-  console.log("LinkAI: Extension context was invalidated. Cleaned up observers & DOM.");
+  console.log("Quick Comment AI: Extension context was invalidated. Cleaned up observers & DOM.");
 }
 
 let activeDropdownPortal = null;
@@ -267,7 +267,7 @@ function showToneDropdownPortal(triggerElement, currentTone, onSelect) {
 
   // Create portal dropdown container
   const portal = document.createElement("div");
-  portal.className = "linkai-portal-dropdown";
+  portal.className = "quickcomment-portal-dropdown";
   
   // Style portal
   portal.style.position = "fixed";
@@ -359,7 +359,7 @@ function closeActiveDropdownPortal() {
 
 // Initialize DOM checking
 function init() {
-  console.log("LinkAI Comment Generator active on page");
+  console.log("Quick Comment AI Comment Generator active on page");
   
   if (!isContextValid()) return;
   
@@ -420,26 +420,26 @@ function scanForCommentFields() {
 
     if (!isCommentOrReply) return;
 
-    // Self-healing check: check if the parent container actually contains .linkai-container-host
+    // Self-healing check: check if the parent container actually contains .quickcomment-container-host
     const form = editor.closest("form, [class*='comment-box'], .comments-comment-box__form-container, .comments-comment-box");
     let hasContainer = false;
     if (form) {
-      hasContainer = form.querySelector(".linkai-container-host") !== null;
+      hasContainer = form.querySelector(".quickcomment-container-host") !== null;
     } else if (editor.parentElement) {
-      hasContainer = editor.parentElement.querySelector(".linkai-container-host") !== null;
+      hasContainer = editor.parentElement.querySelector(".quickcomment-container-host") !== null;
     }
 
     if (hasContainer) {
       // Ensure attribute is set if the container already exists
-      if (editor.getAttribute("data-linkai-injected") !== "true") {
-        editor.setAttribute("data-linkai-injected", "true");
+      if (editor.getAttribute("data-quickcomment-injected") !== "true") {
+        editor.setAttribute("data-quickcomment-injected", "true");
       }
       return;
     }
 
     // Clear attribute first to be safe, then set it and inject
-    editor.removeAttribute("data-linkai-injected");
-    editor.setAttribute("data-linkai-injected", "true");
+    editor.removeAttribute("data-quickcomment-injected");
+    editor.setAttribute("data-quickcomment-injected", "true");
 
     injectAIElements(editor);
   });
@@ -466,7 +466,7 @@ function injectAIElements(editor) {
 
   // Create outer container for Shadow DOM
   const container = document.createElement("div");
-  container.className = "linkai-container-host";
+  container.className = "quickcomment-container-host";
   container.style.display = "inline-block";
   container.style.verticalAlign = "middle";
 
@@ -480,25 +480,25 @@ function injectAIElements(editor) {
 
   // Add html structure
   const root = document.createElement("div");
-  root.className = "linkai-container";
+  root.className = "quickcomment-container";
   
   // Generate Button
   const genBtn = document.createElement("button");
   genBtn.type = "button";
-  genBtn.className = "linkai-btn";
-  genBtn.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">generate</span>`;
+  genBtn.className = "quickcomment-btn";
+  genBtn.innerHTML = `<span class="quickcomment-btn-icon">${SPARKLE_SVG}</span><span class="quickcomment-btn-text">generate</span>`;
   
   // Tone Dropdown Trigger Button
   const toneTrigger = document.createElement("button");
   toneTrigger.type = "button";
-  toneTrigger.className = "linkai-tone-trigger";
+  toneTrigger.className = "quickcomment-tone-trigger";
 
   root.appendChild(genBtn);
   root.appendChild(toneTrigger);
   
   // Status feedback text
   const statusText = document.createElement("span");
-  statusText.className = "linkai-status";
+  statusText.className = "quickcomment-status";
   root.appendChild(statusText);
 
   shadow.appendChild(root);
@@ -536,7 +536,7 @@ function injectAIElements(editor) {
 
   function updateToneUI() {
     const activeTone = TONES.find(t => t.id === currentTone) || TONES[0];
-    toneTrigger.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">${activeTone.label.toLowerCase()}</span><span style="font-size: 8px; margin-left: 2px; opacity: 0.6;">▼</span>`;
+    toneTrigger.innerHTML = `<span class="quickcomment-btn-icon">${SPARKLE_SVG}</span><span class="quickcomment-btn-text">${activeTone.label.toLowerCase()}</span><span style="font-size: 8px; margin-left: 2px; opacity: 0.6;">▼</span>`;
   }
 
   updateToneUI();
@@ -579,7 +579,7 @@ function injectAIElements(editor) {
 
     // Get post container
     const postContainer = findPostContainer(editor);
-    console.log("LinkAI: Post Container found:", postContainer);
+    console.log("Quick Comment AI: Post Container found:", postContainer);
 
     if (!postContainer) {
       showStatus("Could not find post text container.", "error");
@@ -588,7 +588,7 @@ function injectAIElements(editor) {
 
     // Extract text content of the post
     const postText = extractPostContent(postContainer, editor);
-    console.log("LinkAI: Extracted Post Text:", postText);
+    console.log("Quick Comment AI: Extracted Post Text:", postText);
 
     if (!postText || postText.trim().length === 0) {
       showStatus("Post content is empty or unreadable.", "error");
@@ -614,7 +614,7 @@ function injectAIElements(editor) {
       chrome.storage.local.get("customInstructions", (data) => {
         const customInstructions = (data && data.customInstructions) || "";
 
-        console.log("LinkAI: Sending generation request:", {
+        console.log("Quick Comment AI: Sending generation request:", {
           postText: postText,
           tone: currentTone,
           customInstructions: customInstructions,
@@ -674,17 +674,17 @@ function injectAIElements(editor) {
     genBtn.disabled = isGenerating;
     toneTrigger.disabled = isGenerating;
     if (isGenerating) {
-      genBtn.innerHTML = `<span class="linkai-spinner"></span><span class="linkai-btn-text">generating...</span>`;
+      genBtn.innerHTML = `<span class="quickcomment-spinner"></span><span class="quickcomment-btn-text">generating...</span>`;
     } else if (hasGenerated) {
-      genBtn.innerHTML = `<span class="linkai-btn-icon">${REGEN_SVG}</span><span class="linkai-btn-text">regenerate</span>`;
+      genBtn.innerHTML = `<span class="quickcomment-btn-icon">${REGEN_SVG}</span><span class="quickcomment-btn-text">regenerate</span>`;
     } else {
-      genBtn.innerHTML = `<span class="linkai-btn-icon">${SPARKLE_SVG}</span><span class="linkai-btn-text">generate</span>`;
+      genBtn.innerHTML = `<span class="quickcomment-btn-icon">${SPARKLE_SVG}</span><span class="quickcomment-btn-text">generate</span>`;
     }
   }
 
   function showStatus(text, type) {
     statusText.textContent = text;
-    statusText.className = "linkai-status";
+    statusText.className = "quickcomment-status";
     if (type) {
       statusText.classList.add(type);
     }
@@ -720,7 +720,7 @@ function findPostContainer(editor) {
     ? commentBox.parentElement
     : editor.parentElement;
     
-  console.log("LinkAI: Search root (after escaping comment box):", searchRoot);
+  console.log("Quick Comment AI: Search root (after escaping comment box):", searchRoot);
   if (!searchRoot) return null;
 
   // Step 2: Try stable selectors from searchRoot upward
@@ -832,7 +832,7 @@ function extractPostContent(postContainer, editor = null) {
       span.closest(".comments-comment-item") ||
       span.closest(".comments-comments-list") ||
       span.closest(".comments-comment-box") ||
-      span.closest(".linkai-container-host") ||
+      span.closest(".quickcomment-container-host") ||
       span.closest('[data-view-name*="comment"]') ||
       span.closest(".feed-shared-actor") ||
       span.closest(".update-components-actor") ||
@@ -953,8 +953,8 @@ function extractPostContent(postContainer, editor = null) {
       ".feed-shared-social-action-bar",
       ".feed-shared-social-actions",
       "button",
-      ".linkai-container-host",
-      ".linkai-container",
+      ".quickcomment-container-host",
+      ".quickcomment-container",
       ".comments-comment-box-container",
       "script",
       "style",
@@ -1037,7 +1037,7 @@ function autofillDraftJSEditor(editor, text) {
           try {
             success = document.execCommand("insertText", false, token);
           } catch (e) {
-            console.error("LinkAI: execCommand token insert failed", e);
+            console.error("Quick Comment AI: execCommand token insert failed", e);
           }
 
           if (!success) {
@@ -1066,7 +1066,7 @@ function autofillDraftJSEditor(editor, text) {
             keyCode: 32
           });
           editor.dispatchEvent(keyUpEvent);
-          console.log("LinkAI: Finished typing comment successfully.");
+          console.log("Quick Comment AI: Finished typing comment successfully.");
         }
       }
 
@@ -1120,7 +1120,7 @@ function getLinkedInUserIdentifier() {
       }
     }
   } catch (err) {
-    console.warn("Eloquix: Error capturing LinkedIn profile identifier", err);
+    console.warn("Quick Comment AI: Error capturing LinkedIn profile identifier", err);
   }
   return null;
 }

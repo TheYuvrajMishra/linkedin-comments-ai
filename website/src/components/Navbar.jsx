@@ -23,7 +23,7 @@ export default function Navbar() {
           </svg>
         </div>
         <div>
-          <span className="text-sm font-bold tracking-tight text-white block leading-none">Eloquix</span>
+          <span className="text-sm font-bold tracking-tight text-white block leading-none">Quick Comment AI</span>
           <span className="text-[10px] font-mono text-zinc-500">AI Companion</span>
         </div>
       </Link>

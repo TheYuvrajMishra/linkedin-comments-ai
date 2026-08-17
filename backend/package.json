@@ -1,7 +1,7 @@
 {
-  "name": "eloquix-backend",
+  "name": "quick-comment-ai-backend",
   "version": "1.0.0",
-  "description": "Backend API server for Eloquix LinkedIn AI Comment Generator Chrome Extension",
+  "description": "Backend API server for Quick Comment AI LinkedIn AI Comment Generator Chrome Extension",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",

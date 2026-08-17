@@ -48,6 +48,7 @@ export default function ExtensionPage() {
 
   // Sync auth state & broadcast to Chrome extension
   useEffect(() => {
+    document.title = "Extension Session & Account Hub - Quick Comment AI";
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       setLoading(true);
       if (currentUser) {
@@ -60,9 +61,11 @@ export default function ExtensionPage() {
           };
 
           // Save to local storage for extension bridge
+          localStorage.setItem('quick_comment_ai_auth', JSON.stringify(authData));
           localStorage.setItem('eloquix_auth', JSON.stringify(authData));
 
           // Post message to window for content script / bridge
+          window.postMessage({ type: 'QUICK_COMMENT_AI_AUTH_STATE', userAuth: authData }, '*');
           window.postMessage({ type: 'ELOQUIX_AUTH_STATE', userAuth: authData }, '*');
 
           setUser(currentUser);
@@ -81,7 +84,9 @@ export default function ExtensionPage() {
           console.error("Error setting up user auth token:", e);
         }
       } else {
+        localStorage.removeItem('quick_comment_ai_auth');
         localStorage.removeItem('eloquix_auth');
+        window.postMessage({ type: 'QUICK_COMMENT_AI_AUTH_STATE', userAuth: null }, '*');
         window.postMessage({ type: 'ELOQUIX_AUTH_STATE', userAuth: null }, '*');
         setUser(null);
         setUserProfile(null);
@@ -185,7 +190,7 @@ export default function ExtensionPage() {
                 Extension Session & Account Center
               </h1>
               <p className="text-sm sm:text-base font-mono text-neutral-400 max-w-2xl leading-relaxed">
-                Single source of truth for Eloquix Chrome Extension authentication. Logging in here automatically authenticates your browser extension in real time.
+                Single source of truth for Quick Comment AI Chrome Extension authentication. Logging in here automatically authenticates your browser extension in real time.
               </p>
             </GridSection>
 
@@ -425,7 +430,7 @@ export default function ExtensionPage() {
               <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
               <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
 
-              <div>Eloquix Portal (/extension) &bull; Full-Bleed Structural Intersections</div>
+              <div>Quick Comment AI Portal (/extension) &bull; Full-Bleed Structural Intersections</div>
               <Link to="/" className="text-neutral-400 hover:text-white transition-colors">
                 &larr; Back to Overview
               </Link>

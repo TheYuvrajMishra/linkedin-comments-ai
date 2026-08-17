@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { BackgroundBeams } from '../components/ui/background-beams';
@@ -20,6 +20,9 @@ function GridSection({ children, className = "", id }) {
 }
 
 export default function HomePage() {
+  useEffect(() => {
+    document.title = "Quick Comment AI - LinkedIn AI Comment Generator & Chrome Extension";
+  }, []);
   return (
     <div className="relative min-h-[100dvh] bg-black text-white flex flex-col justify-between selection:bg-white selection:text-black overflow-hidden font-sans">
       {/* Aceternity Background Beams */}
@@ -59,7 +62,7 @@ export default function HomePage() {
                   </h1>
 
                   <p className="text-base sm:text-lg text-neutral-400 max-w-3xl leading-relaxed mb-12 font-sans font-normal">
-                    Eloquix integrates directly into your LinkedIn feed. Generate sharp, high-value, non-robotic comments tailored to your personal writing style — zero fluff, zero generic praise.
+                    Quick Comment AI integrates directly into your LinkedIn feed. Generate sharp, high-value, non-robotic comments tailored to your personal writing style — zero fluff, zero generic praise.
                   </p>
 
                   {/* Double-Bezel Nested CTA Pill */}
@@ -214,7 +217,7 @@ export default function HomePage() {
                   Live In-Feed Demonstration
                 </h2>
                 <p className="text-xs text-neutral-400 font-mono">
-                  Eloquix attaches directly to LinkedIn comment triggers across all post formats.
+                  Quick Comment AI attaches directly to LinkedIn comment triggers across all post formats.
                 </p>
               </div>
 
@@ -234,7 +237,7 @@ export default function HomePage() {
             {/* Workflow Sequence */}
             <GridSection>
               <h2 className="relative z-10 text-2xl sm:text-3xl md:text-4xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400 mb-12">
-                How Eloquix Works
+                How Quick Comment AI Works
               </h2>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -251,7 +254,7 @@ export default function HomePage() {
                   <div className="bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8">
                     <span className="text-xs font-mono font-bold text-white block mb-2">02. Trigger In-Feed</span>
                     <p className="text-xs text-neutral-400 font-mono leading-relaxed">
-                      Browse LinkedIn. Click the inline Eloquix action button beside any comment box.
+                      Browse LinkedIn. Click the inline Quick Comment AI action button beside any comment box.
                     </p>
                   </div>
                 </div>
@@ -299,7 +302,7 @@ export default function HomePage() {
               <div className="absolute -top-4 -bottom-4 left-0 w-[1px] bg-white/10 pointer-events-none z-10" />
               <div className="absolute -top-4 -bottom-4 right-0 w-[1px] bg-white/10 pointer-events-none z-10" />
 
-              <div>Eloquix &bull; Full-Bleed Structural Intersection Architecture</div>
+              <div>Quick Comment AI &bull; Full-Bleed Structural Intersection Architecture</div>
               <Link to="/extension" className="text-neutral-400 hover:text-white transition-colors">
                 /extension Portal &rarr;
               </Link>

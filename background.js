@@ -1,4 +1,4 @@
-// Background service worker for Eloquix Chrome Extension
+// Background service worker for Quick Comment AI Chrome Extension
 importScripts("config.js", "firebase-db.js");
 
 // In-memory client cache for generated comments
@@ -76,7 +76,7 @@ async function handleCommentGeneration({ postText, tone, customInstructions, reg
     console.error("Backend generation request failed:", error);
     // Friendly error message if backend is offline
     if (error.message && error.message.includes("Failed to fetch")) {
-      throw new Error("Unable to connect to Eloquix Backend Server. Please check if the server is running on http://localhost:5000.");
+      throw new Error("Unable to connect to Quick Comment AI Backend Server. Please check if the server is running on http://localhost:5000.");
     }
     throw error;
   }

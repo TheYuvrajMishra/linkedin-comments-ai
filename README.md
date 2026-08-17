@@ -1,12 +1,12 @@
-# Eloquix (LinkAI): LinkedIn AI Comment Generator & Web Portal
+# Quick Comment AI: LinkedIn AI Comment Generator & Web Portal
 
-Eloquix is a premium, security-focused Chrome Extension (Manifest V3), modern Vite React Web Application, and Node.js Backend API Server that generates sharp, context-aware AI comments for LinkedIn posts directly inside the LinkedIn interface using Groq LLM acceleration.
+Quick Comment AI is a premium, security-focused Chrome Extension (Manifest V3), modern Vite React Web Application, and Node.js Backend API Server that generates sharp, context-aware AI comments for LinkedIn posts directly inside the LinkedIn interface using Groq LLM acceleration.
 
 ---
 
 ## 🏗️ Architecture Overview
 
-Eloquix uses a decoupled, three-tier architecture ensuring zero client-side API key exposure, multi-device session sync, and strict server-side abuse prevention.
+Quick Comment AI uses a decoupled, three-tier architecture ensuring zero client-side API key exposure, multi-device session sync, and strict server-side abuse prevention.
 
 ```
 ┌─────────────────────────┐          ┌─────────────────────────┐          ┌─────────────────────────┐
@@ -87,7 +87,7 @@ Create `backend/.env` (or copy from `backend/.env.example`):
 ```env
 PORT=5000
 FRONTEND_URL=https://linkedin-comments-ai.vercel.app
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/eloquix?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/quick_comment_ai?retryWrites=true&w=majority
 GROQ_API_KEY=gsk_your_groq_api_key_here
 DEFAULT_GROQ_MODEL=llama-3.1-8b-instant
 

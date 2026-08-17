@@ -369,7 +369,7 @@ function hashString(str) {
 const healthHandler = (req, res) => {
   res.json({
     status: "ok",
-    service: "Eloquix LinkedIn AI Comment Backend API",
+    service: "Quick Comment AI LinkedIn AI Comment Backend API",
     timestamp: new Date().toISOString(),
     hasGroqKey: !!process.env.GROQ_API_KEY,
     database: isMongoConnected ? "MongoDB Atlas Cloud" : "Local JSON Storage"
@@ -654,7 +654,7 @@ app.post("/api/v1/payments/webhook", async (req, res) => {
 // Start Server
 app.listen(PORT, () => {
   console.log("--------------------------------------------------");
-  console.log(`🚀 Eloquix Backend API running on http://localhost:${PORT}`);
+  console.log(`🚀 Quick Comment AI Backend API running on http://localhost:${PORT}`);
   console.log(`🔑 Groq API Status: ${process.env.GROQ_API_KEY ? "Configured" : "MISSING (Set in backend/.env)"}`);
   console.log(`🍃 Database Status: ${mongoUri ? "Connecting to MongoDB Cloud..." : "Local JSON Storage"}`);
   console.log("--------------------------------------------------");

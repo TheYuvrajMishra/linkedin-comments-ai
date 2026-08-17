@@ -1,4 +1,4 @@
-// Frontend Configuration for Eloquix Chrome Extension
+// Frontend Configuration for Quick Comment AI Chrome Extension
 // Communicates with backend API server and companion auth website
 
 const BACKEND_URL = "http://localhost:5000";
