@@ -7,12 +7,12 @@ const WEBSITE_URL = "http://localhost:5173";
 // Fallback Payment Links if backend is unreachable
 const PAYMENT_LINKS = {
   inr: {
-    pro: "https://rzp.io/rzp/YJ677Vl",
-    ultra: "https://rzp.io/rzp/Oyz6stR"
+    pro: "https://rzp.io/rzp/8fyIuiTV",
+    ultra: "https://rzp.io/rzp/AKMnRQ9h"
   },
   usd: {
-    pro: "https://rzp.io/rzp/twQPHug",
-    ultra: "https://rzp.io/rzp/7d2rZJB"
+    pro: "https://rzp.io/rzp/lwkO8dn8",
+    ultra: "https://rzp.io/rzp/5SoMpUI"
   }
 };
 

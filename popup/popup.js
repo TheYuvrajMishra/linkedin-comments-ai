@@ -10,8 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const quotaText = document.getElementById("quotaText");
   const quotaFill = document.getElementById("quotaFill");
 
-  const proBtn = document.getElementById("proBtn");
-  const ultraBtn = document.getElementById("ultraBtn");
+  const portalSubBtn = document.getElementById("portalSubBtn");
 
   const webAuthBtn = document.getElementById("webAuthBtn");
   const webAuthBtnText = document.getElementById("webAuthBtnText");
@@ -32,26 +31,11 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Check Backend Connection Status
   checkBackendHealth(activeBackendUrl);
 
-  // Configure upgrade button links based on currency (INR vs USD)
-  const isIndia = isIndiaUser();
-  if (isIndia) {
-    if (proBtn) {
-      proBtn.href = PAYMENT_LINKS.inr.pro;
-      proBtn.textContent = "⚡ Upgrade Pro (₹49/mo)";
-    }
-    if (ultraBtn) {
-      ultraBtn.href = PAYMENT_LINKS.inr.ultra;
-      ultraBtn.textContent = "🚀 Upgrade Ultra (₹99/mo)";
-    }
-  } else {
-    if (proBtn) {
-      proBtn.href = PAYMENT_LINKS.usd.pro;
-      proBtn.textContent = "⚡ Upgrade Pro ($4.99/mo)";
-    }
-    if (ultraBtn) {
-      ultraBtn.href = PAYMENT_LINKS.usd.ultra;
-      ultraBtn.textContent = "🚀 Upgrade Ultra ($7.99/mo)";
-    }
+  // Redirect to Web Portal for Subscriptions
+  if (portalSubBtn) {
+    portalSubBtn.addEventListener("click", () => {
+      chrome.tabs.create({ url: activeWebsiteUrl + "/extension" });
+    });
   }
 
   // Load User Account Quota info from Backend API Server

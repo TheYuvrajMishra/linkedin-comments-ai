@@ -483,12 +483,12 @@ app.post("/api/v1/payments/create-checkout", (req, res) => {
   let checkoutUrl = "";
   if (isINR) {
     checkoutUrl = plan === "ultra"
-      ? (process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/Oyz6stR")
-      : (process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/YJ677Vl");
+      ? (process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/AKMnRQ9h")
+      : (process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/8fyIuiTV");
   } else {
     checkoutUrl = plan === "ultra"
-      ? (process.env.RAZORPAY_ULTRA_LINK_USD || "https://rzp.io/rzp/7d2rZJB")
-      : (process.env.RAZORPAY_PRO_LINK_USD || "https://rzp.io/rzp/twQPHug");
+      ? (process.env.RAZORPAY_ULTRA_LINK_USD || "https://rzp.io/rzp/5SoMpUI")
+      : (process.env.RAZORPAY_PRO_LINK_USD || "https://rzp.io/rzp/lwkO8dn8");
   }
 
   res.json({

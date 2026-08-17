@@ -14,12 +14,12 @@ const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:5000";
 
 const PAYMENT_LINKS = {
   inr: {
-    pro: process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/YJ677Vl",
-    ultra: process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/Oyz6stR"
+    pro: process.env.RAZORPAY_PRO_LINK_INR || "https://rzp.io/rzp/8fyIuiTV",
+    ultra: process.env.RAZORPAY_ULTRA_LINK_INR || "https://rzp.io/rzp/AKMnRQ9h"
   },
   usd: {
-    pro: process.env.RAZORPAY_PRO_LINK_USD || "https://rzp.io/rzp/twQPHug",
-    ultra: process.env.RAZORPAY_ULTRA_LINK_USD || "https://rzp.io/rzp/7d2rZJB"
+    pro: process.env.RAZORPAY_PRO_LINK_USD || "https://rzp.io/rzp/lwkO8dn8",
+    ultra: process.env.RAZORPAY_ULTRA_LINK_USD || "https://rzp.io/rzp/5SoMpUI"
   }
 };
 
@@ -299,24 +299,10 @@ export default function ExtensionPage() {
                   </p>
                 </div>
 
-                {/* Currency Selector Pill */}
-                <div className="flex items-center gap-1 bg-white/5 p-1 border border-white/10 rounded-full self-start sm:self-auto">
-                  <button
-                    onClick={() => setCurrency('inr')}
-                    className={`px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                      currency === 'inr' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    INR (₹)
-                  </button>
-                  <button
-                    onClick={() => setCurrency('usd')}
-                    className={`px-4 py-1.5 rounded-full text-[10px] font-mono uppercase tracking-wider transition-colors ${
-                      currency === 'usd' ? 'bg-white text-black font-bold' : 'text-neutral-400 hover:text-white'
-                    }`}
-                  >
-                    USD ($)
-                  </button>
+                {/* Auto-detected Region Indicator Badge */}
+                <div className="flex items-center gap-2 bg-white/5 px-4 py-2 border border-white/10 rounded-full self-start sm:self-auto text-[10px] font-mono text-neutral-300 uppercase tracking-wider">
+                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
+                  <span>Auto-Detected Region: {currency === 'inr' ? 'India (INR ₹)' : 'International (USD $)'}</span>
                 </div>
               </div>
 
@@ -332,7 +318,7 @@ export default function ExtensionPage() {
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-white font-mono mb-6">
-                        {currency === 'inr' ? '₹49' : '$4.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
+                        {currency === 'inr' ? '₹49' : '₹500 / $5.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
                       </div>
                       <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
                         <li className="flex items-center gap-2">
@@ -363,7 +349,7 @@ export default function ExtensionPage() {
                           onClick={() => handleSubscriptionClick('pro')}
                           className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all"
                         >
-                          <span>Upgrade Pro ({currency === 'inr' ? '₹49/mo' : '$4.99/mo'})</span>
+                          <span>Upgrade Pro ({currency === 'inr' ? '₹49/mo' : '₹500/mo'})</span>
                           <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
                             <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
                               <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
@@ -386,7 +372,7 @@ export default function ExtensionPage() {
                         </span>
                       </div>
                       <div className="text-3xl font-bold text-white font-mono mb-6">
-                        {currency === 'inr' ? '₹99' : '$7.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
+                        {currency === 'inr' ? '₹99' : '₹900 / $9.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
                       </div>
                       <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
                         <li className="flex items-center gap-2">
@@ -417,7 +403,7 @@ export default function ExtensionPage() {
                           onClick={() => handleSubscriptionClick('ultra')}
                           className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all"
                         >
-                          <span>Upgrade Ultra ({currency === 'inr' ? '₹99/mo' : '$7.99/mo'})</span>
+                          <span>Upgrade Ultra ({currency === 'inr' ? '₹99/mo' : '₹900/mo'})</span>
                           <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
                             <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
                               <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
