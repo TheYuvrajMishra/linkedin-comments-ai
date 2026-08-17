@@ -274,27 +274,58 @@ export default function HomePage() {
               </div>
             </GridSection>
 
-            {/* CTA Banner Section */}
+            {/* CTA Banner Section - Premium Architectural Glow & Double-Bezel */}
             <GridSection>
-              <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.5rem]">
-                <div className="bg-black border border-white/5 rounded-[calc(2.5rem-0.5rem)] p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8">
-                  <div>
-                    <h3 className="relative z-10 text-2xl md:text-3xl font-sans font-bold bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400 mb-2">Ready to Start?</h3>
-                    <p className="text-xs font-mono text-neutral-400 max-w-lg">
-                      Access your session center, view daily quota usage, and manage your plan subscriptions.
-                    </p>
-                  </div>
-                  <Link
-                    to="/extension"
-                    className="group rounded-full px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-3 hover:bg-neutral-200 active:scale-[0.98] transition-all shrink-0"
-                  >
-                    <span>Go to /extension Portal</span>
-                    <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                      <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-                      </svg>
+              <div className="relative group">
+                {/* Ambient Glow Backdrop Aura */}
+                <div className="absolute -inset-1 rounded-[2.6rem] bg-gradient-to-r from-white/10 via-neutral-500/20 to-white/10 blur-xl opacity-40 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+
+                {/* Main Container with Aceternity GlowingEffect */}
+                <div className="relative bg-[#090909] border border-white/15 p-2 rounded-[2.5rem] overflow-hidden backdrop-blur-md">
+                  <GlowingEffect
+                    spread={60}
+                    glow={true}
+                    disabled={false}
+                    proximity={80}
+                    inactiveZone={0.01}
+                    borderWidth={1.5}
+                  />
+                  <div className="relative z-10 bg-black border border-white/10 rounded-[calc(2.5rem-0.5rem)] p-8 md:p-14 flex flex-col md:flex-row items-center justify-between gap-8 overflow-hidden">
+                    {/* Subtle Architectural Micro-Dot Grid */}
+                    <div 
+                      className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+                      style={{
+                        backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px)`,
+                        backgroundSize: '16px 16px',
+                        maskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 85%)',
+                        WebkitMaskImage: 'radial-gradient(ellipse at center, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 85%)'
+                      }}
+                    />
+
+                    <div className="relative z-10">
+                      <h3 className="relative z-10 text-2xl md:text-3xl lg:text-4xl font-sans font-bold bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-400 mb-2 tracking-tight">Ready to Start?</h3>
+                      <p className="text-xs sm:text-sm font-mono text-neutral-400 max-w-lg leading-relaxed">
+                        Access your session center, view daily quota usage, and manage your plan subscriptions.
+                      </p>
                     </div>
-                  </Link>
+
+                    {/* Double-Bezel High-Shine CTA Pill */}
+                    <div className="relative z-10 p-1 rounded-full bg-neutral-900 border border-white/20 shadow-2xl hover:border-white/40 transition-colors shrink-0">
+                      <Link
+                        to="/extension"
+                        className="group/btn relative rounded-full px-8 py-4 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center gap-3 hover:bg-neutral-100 active:scale-[0.98] transition-all overflow-hidden"
+                      >
+                        {/* Shimmer sweep effect */}
+                        <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-1000 ease-in-out pointer-events-none" />
+                        <span className="relative z-10">Go to /extension Portal</span>
+                        <div className="relative z-10 w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:translate-x-1 group-hover/btn:bg-black group-hover/btn:text-white transition-all duration-300">
+                          <svg className="w-3.5 h-3.5 text-current" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </div>
+                      </Link>
+                    </div>
+                  </div>
                 </div>
               </div>
             </GridSection>

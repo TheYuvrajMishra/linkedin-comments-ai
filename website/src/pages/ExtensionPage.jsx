@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { BackgroundBeams } from '../components/ui/background-beams';
+import { GlowingEffect } from '../components/ui/glowing-effect';
 import SideMarginPatterns from '../components/ui/side-margin-patterns';
 import {
   auth,
@@ -297,52 +298,61 @@ export default function ExtensionPage() {
 
             {/* Subscription Section */}
             <GridSection>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                <div>
-                  <h3 className="relative z-10 text-2xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400">Subscription Tier Selection</h3>
-                  <p className="text-xs font-mono text-neutral-400 mt-1">
-                    Gated purchase &bull; Authentication required before upgrading.
-                  </p>
-                </div>
-
-                {/* Auto-detected Region Indicator Badge */}
-                <div className="flex items-center gap-2 bg-white/5 px-4 py-2 border border-white/10 rounded-full self-start sm:self-auto text-[10px] font-mono text-neutral-300 uppercase tracking-wider">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-                  <span>Auto-Detected Region: {currency === 'inr' ? 'India (INR ₹)' : 'International (USD $)'}</span>
-                </div>
+              <div className="mb-10">
+                <h3 className="relative z-10 text-2xl font-sans font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-b from-neutral-100 to-neutral-400">Subscription Tier Selection</h3>
+                <p className="text-xs font-mono text-neutral-400 mt-1">
+                  Gated purchase &bull; Authentication required before upgrading.
+                </p>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Pro Plan - Double Bezel */}
-                <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
-                  <div className="bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 h-full flex flex-col justify-between">
-                    <div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {/* Pro Plan - High-End Double Bezel with GlowingEffect */}
+                <div className="relative bg-[#090909] border border-white/15 p-2 rounded-[2.2rem] backdrop-blur-md hover:border-white/30 transition-colors group">
+                  <GlowingEffect
+                    spread={40}
+                    glow={true}
+                    disabled={false}
+                    proximity={64}
+                    inactiveZone={0.01}
+                    borderWidth={1.5}
+                  />
+                  <div className="relative z-10 bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 md:p-10 h-full flex flex-col justify-between overflow-hidden">
+                    {/* Micro Dot Texture Background */}
+                    <div 
+                      className="absolute inset-0 z-0 opacity-15 pointer-events-none"
+                      style={{
+                        backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.25) 1px, transparent 1px)`,
+                        backgroundSize: '12px 12px'
+                      }}
+                    />
+
+                    <div className="relative z-10">
                       <div className="flex items-center justify-between mb-4">
                         <h4 className="text-xl font-bold text-white">Pro Plan</h4>
-                        <span className="text-[10px] font-mono text-neutral-400 border border-white/10 px-2.5 py-1 rounded-full bg-white/5">
+                        <span className="text-[10px] font-mono text-neutral-300 border border-white/15 px-3 py-1 rounded-full bg-white/5 backdrop-blur-md">
                           20 COMMENTS/DAY
                         </span>
                       </div>
-                      <div className="text-3xl font-bold text-white font-mono mb-6">
+                      <div className="text-3xl font-bold text-white font-mono mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-400">
                         {currency === 'inr' ? '₹49' : '₹500 / $5.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
                       </div>
                       <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> 20 AI comments per day
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> 20 AI comments per day
                         </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> All 5 comment tones
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> All 5 comment tones
                         </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> Custom writing style persona
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> Custom writing style persona
                         </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> Priority Groq API speed
+                        <li className="flex items-center gap-2.5">
+                          <span className="w-1.5 h-1.5 rounded-full bg-neutral-400 shrink-0" /> Priority Groq API speed
                         </li>
                       </ul>
                     </div>
 
-                    <div>
+                    <div className="relative z-10">
                       {!user ? (
                         <button
                           onClick={() => handleSubscriptionClick('pro')}
@@ -353,12 +363,12 @@ export default function ExtensionPage() {
                       ) : (
                         <button
                           onClick={() => handleSubscriptionClick('pro')}
-                          className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all"
+                          className="group/btn w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all shadow-lg"
                         >
                           <span>Upgrade Pro ({currency === 'inr' ? '₹49/mo' : '₹500/mo'})</span>
-                          <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
-                              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
+                          <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
+                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" stroke="currentColor">
+                              <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
                             </svg>
                           </div>
                         </button>
@@ -367,56 +377,80 @@ export default function ExtensionPage() {
                   </div>
                 </div>
 
-                {/* Ultra Plan - Double Bezel */}
-                <div className="bg-[#090909] border border-white/10 p-2 rounded-[2.2rem] backdrop-blur-sm">
-                  <div className="bg-black border border-white/5 rounded-[calc(2.2rem-0.5rem)] p-8 h-full flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-4">
-                        <h4 className="text-xl font-bold text-white">Ultra Plan</h4>
-                        <span className="text-[10px] font-mono text-neutral-400 border border-white/10 px-2.5 py-1 rounded-full bg-white/5">
-                          50 COMMENTS/DAY
-                        </span>
-                      </div>
-                      <div className="text-3xl font-bold text-white font-mono mb-6">
-                        {currency === 'inr' ? '₹99' : '₹900 / $9.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
-                      </div>
-                      <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> 50 AI comments per day
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> Priority server queueing
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> Unlimited comment regenerations
-                        </li>
-                        <li className="flex items-center gap-2">
-                          <span className="text-neutral-500">—</span> Dedicated support access
-                        </li>
-                      </ul>
-                    </div>
+                {/* Ultra Plan - Featured Glow Tier with Ambient Backlight Aura */}
+                <div className="relative group">
+                  {/* Ambient Glow Backdrop Aura */}
+                  <div className="absolute -inset-1 rounded-[2.3rem] bg-gradient-to-r from-white/20 via-neutral-300/30 to-white/20 blur-lg opacity-40 group-hover:opacity-80 transition-opacity duration-700 pointer-events-none" />
 
-                    <div>
-                      {!user ? (
-                        <button
-                          onClick={() => handleSubscriptionClick('ultra')}
-                          className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
-                        >
-                          Log In to Subscribe
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleSubscriptionClick('ultra')}
-                          className="group w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all"
-                        >
-                          <span>Upgrade Ultra ({currency === 'inr' ? '₹99/mo' : '₹900/mo'})</span>
-                          <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                            <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" stroke-width="2.5" stroke="currentColor">
-                              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </div>
-                        </button>
-                      )}
+                  <div className="relative bg-[#090909] border border-white/25 p-2 rounded-[2.2rem] backdrop-blur-md hover:border-white/40 transition-colors h-full">
+                    <GlowingEffect
+                      spread={50}
+                      glow={true}
+                      disabled={false}
+                      proximity={64}
+                      inactiveZone={0.01}
+                      borderWidth={1.5}
+                    />
+                    <div className="relative z-10 bg-black border border-white/10 rounded-[calc(2.2rem-0.5rem)] p-8 md:p-10 h-full flex flex-col justify-between overflow-hidden">
+                      {/* Micro Dot Texture Background */}
+                      <div 
+                        className="absolute inset-0 z-0 opacity-20 pointer-events-none"
+                        style={{
+                          backgroundImage: `radial-gradient(rgba(255, 255, 255, 0.3) 1px, transparent 1px)`,
+                          backgroundSize: '12px 12px'
+                        }}
+                      />
+
+                      <div className="relative z-10">
+                        <div className="flex items-center justify-between mb-4">
+                          <h4 className="text-xl font-bold text-white flex items-center gap-2">
+                            <span>Ultra Plan</span>
+                          </h4>
+                          <span className="text-[10px] font-mono font-bold text-black bg-white border border-white px-3 py-1 rounded-full shadow-[0_0_10px_rgba(255,255,255,0.4)]">
+                            50 COMMENTS/DAY
+                          </span>
+                        </div>
+                        <div className="text-3xl font-bold text-white font-mono mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-neutral-100 to-neutral-400">
+                          {currency === 'inr' ? '₹99' : '₹900 / $9.99'} <span className="text-xs font-normal text-neutral-500">/ month</span>
+                        </div>
+                        <ul className="space-y-3 mb-8 text-xs text-neutral-300 font-mono">
+                          <li className="flex items-center gap-2.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] shrink-0" /> 50 AI comments per day
+                          </li>
+                          <li className="flex items-center gap-2.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] shrink-0" /> Priority server queueing
+                          </li>
+                          <li className="flex items-center gap-2.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] shrink-0" /> Unlimited comment regenerations
+                          </li>
+                          <li className="flex items-center gap-2.5">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.8)] shrink-0" /> Dedicated support access
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div className="relative z-10">
+                        {!user ? (
+                          <button
+                            onClick={() => handleSubscriptionClick('ultra')}
+                            className="w-full rounded-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-400 hover:text-white font-mono text-xs uppercase tracking-wider transition-colors"
+                          >
+                            Log In to Subscribe
+                          </button>
+                        ) : (
+                          <button
+                            onClick={() => handleSubscriptionClick('ultra')}
+                            className="group/btn w-full rounded-full py-3.5 px-6 bg-white text-black font-mono font-bold text-xs uppercase tracking-wider flex items-center justify-between hover:bg-neutral-200 active:scale-[0.98] transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+                          >
+                            <span>Upgrade Ultra ({currency === 'inr' ? '₹99/mo' : '₹900/mo'})</span>
+                            <div className="w-6 h-6 rounded-full bg-black/10 flex items-center justify-center group-hover/btn:translate-x-1 transition-transform">
+                              <svg className="w-3.5 h-3.5 text-black" viewBox="0 0 24 24" fill="none" strokeWidth="2.5" stroke="currentColor">
+                                <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+                              </svg>
+                            </div>
+                          </button>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>
