@@ -147,5 +147,9 @@ npm run dev
 
 ---
 
-## 📄 License
-Distributed under the MIT License. See `LICENSE` for details.
+## 📄 License & Usage Warning
+
+Distributed under the MIT License with Express Usage Restrictions. See [LICENSE](LICENSE) for full details.
+
+> ⚠️ **NOTICE & USAGE RESTRICTION**: This repository, brand assets, and backend services are developed by Yuvraj Mishra for educational, personal reference, and evaluation purposes only. Unauthorized commercial re-selling, re-packaging, or re-branding without prior written permission is strictly prohibited.
+
