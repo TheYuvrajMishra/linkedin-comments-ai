@@ -35,6 +35,11 @@ export default defineConfig({
     react(),
     tailwindcss()
   ],
+  resolve: {
+    alias: {
+      '@': path.resolve(__dirname, './src')
+    }
+  },
   define: {
     'process.env': JSON.stringify(rootEnv)
   },
