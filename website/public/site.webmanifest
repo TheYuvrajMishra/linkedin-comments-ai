@@ -1,0 +1,17 @@
+{
+  "name": "Quick Comment AI",
+  "short_name": "QuickComment",
+  "description": "Generate sharp, context-aware AI comments for LinkedIn posts directly inside your feed.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#09090b",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

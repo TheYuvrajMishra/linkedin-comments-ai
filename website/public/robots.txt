@@ -1,0 +1,17 @@
+# Quick Comment AI - Robots File
+# https://quickcommentai.com
+
+User-agent: *
+Allow: /
+Allow: /extension
+
+# Disallow API proxy endpoints and internal assets
+Disallow: /api/
+Disallow: /_next/
+Disallow: /static/
+
+# Crawl-delay for crawler management
+Crawl-delay: 1
+
+# Sitemap Location
+Sitemap: https://quickcommentai.com/sitemap.xml
