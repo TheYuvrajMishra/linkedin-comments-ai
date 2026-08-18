@@ -472,6 +472,51 @@ app.get("/api/v1/config", (req, res) => {
   });
 });
 
+// 1b-2. Admin Endpoint: Reset Daily Quota for All Users
+app.post("/api/v1/admin/reset-quotas", async (req, res) => {
+  try {
+    const today = getTodayString();
+    let mongoResetCount = 0;
+    let localResetCount = 0;
+
+    // 1. Reset MongoDB Atlas Cloud DB users
+    if (isMongoConnected) {
+      const result = await User.updateMany(
+        {},
+        { $set: { commentsGeneratedToday: 0, lastResetDate: today } }
+      );
+      mongoResetCount = result.modifiedCount || result.nModified || 0;
+    }
+
+    // 2. Reset Local JSON DB users
+    const users = loadLocalUsers();
+    for (const uid in users) {
+      users[uid].commentsGeneratedToday = 0;
+      users[uid].lastResetDate = today;
+      localResetCount++;
+    }
+    saveLocalUsers(users);
+
+    // 3. Clear in-memory comment cache
+    commentCache.clear();
+
+    console.log(`[Admin Action] Reset daily quota for all users (Date: ${today})`);
+
+    return res.json({
+      success: true,
+      message: "Successfully reset daily comment quota for all users.",
+      today: today,
+      stats: {
+        mongoUsersReset: mongoResetCount,
+        localUsersReset: localResetCount
+      }
+    });
+  } catch (err) {
+    console.error("Admin quota reset error:", err);
+    return res.status(500).json({ success: false, error: err.message || "Failed to reset user quotas." });
+  }
+});
+
 // 1c. Waitlist GET Count Endpoint
 app.get("/api/v1/waitlist/count", async (req, res) => {
   try {
@@ -729,7 +774,26 @@ Your goal is to write a single, high-quality, engaging, and value-adding comment
 ${sanitizedCustomInstructions ? `\nAdditional Context/Instructions for the Commentator: ${sanitizedCustomInstructions}` : ""}`;
 
     const prompt = `Post Content:\n"""\n${sanitizedPostText}\n"""\n\nGenerate the comment using the "${tone}" tone:`;
-    const model = process.env.DEFAULT_GROQ_MODEL || "llama-3.1-8b-instant";
+    let model = process.env.DEFAULT_GROQ_MODEL || "groq/compound-mini";
+
+    // Auto-migrate decommissioned or empty-content Groq models to current valid active model
+    const DECOMMISSIONED_MODELS = [
+      "llama-3.1-8b-instant",
+      "llama3-8b-8192",
+      "llama3-70b-8192",
+      "llama-3.1-70b-versatile",
+      "llama-3.3-70b-versatile",
+      "llama-3.2-1b-preview",
+      "llama-3.2-3b-preview",
+      "mixtral-8x7b-32768",
+      "gemma-7b-it",
+      "gemma2-9b-it",
+      "openai/gpt-oss-20b",
+      "openai/gpt-oss-120b"
+    ];
+    if (DECOMMISSIONED_MODELS.includes(model)) {
+      model = "groq/compound-mini";
+    }
 
     // E. Execute Groq API Call
     const response = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -762,6 +826,9 @@ ${sanitizedCustomInstructions ? `\nAdditional Context/Instructions for the Comme
 
     const data = await response.json();
     let comment = data.choices?.[0]?.message?.content || "";
+
+    // Clean up reasoning/thinking blocks if present from models like Qwen or DeepSeek
+    comment = comment.replace(/<think>[\s\S]*?<\/think>/gi, "").trim();
 
     // Clean up wrapping quotes
     comment = comment.trim();

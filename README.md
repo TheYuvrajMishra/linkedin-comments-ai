@@ -93,7 +93,7 @@ PORT=5000
 FRONTEND_URL=https://linkedin-comments-ai.vercel.app
 MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/quick_comment_ai?retryWrites=true&w=majority
 GROQ_API_KEY=gsk_your_groq_api_key_here
-DEFAULT_GROQ_MODEL=llama-3.1-8b-instant
+DEFAULT_GROQ_MODEL=groq/compound-mini
 
 RAZORPAY_PRO_LINK_INR=https://rzp.io/rzp/8fyIuiTV
 RAZORPAY_ULTRA_LINK_INR=https://rzp.io/rzp/AKMnRQ9h
